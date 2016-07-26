@@ -1,7 +1,7 @@
 # Tag documents with the LDA algorithm
 
-This repo has a bunch of scrpits to try tag a number of documents based on the
-LDA algorithm.
+An experiment of using the LDA machine learning algorithm to generate topics
+from documents and tag them with those topics
 
 ## Install requirements
 
