@@ -1,0 +1,6 @@
+lda==1.0.4
+nltk==3.2.1
+numpy==1.11.1
+pbr==1.10.0
+stop-words==2015.2.23.1
+textmining==1.0

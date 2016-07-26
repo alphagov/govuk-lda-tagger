@@ -1,0 +1,4 @@
+nltk
+numpy
+lda
+stop_words
