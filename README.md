@@ -19,5 +19,7 @@ The scripts have to be run in sequence:
    `data.titles`, which includes all the titles of the documents.
 2. `python generate_tokens.py` - this will generate a file in `output` called
    `data.tokens`, which includes all the relevant tokens from the documents.
+2. `python generate_ldac.py` - this will generate a file in `output` called
+   `data.ldac`, which includes all the token count information.
 
 TODO
