@@ -10,7 +10,6 @@ These scripts were run on python `3.5.2`. You can install it via `pyenv` and
 
 In order to install the requirements, run `pip install -r requirements.txt`.
 
-
 ## Run
 
 The scripts have to be run in sequence:
@@ -19,7 +18,8 @@ The scripts have to be run in sequence:
    `data.titles`, which includes all the titles of the documents.
 2. `python generate_tokens.py` - this will generate a file in `output` called
    `data.tokens`, which includes all the relevant tokens from the documents.
-2. `python generate_ldac.py` - this will generate a file in `output` called
+3. `python generate_ldac.py` - this will generate a file in `output` called
    `data.ldac`, which includes all the token count information.
-
-TODO
+4. `python generate_topics.py` - this will generate a file in `output` called
+   `data.txt`, which includes all documents tagged and also a number of topics
+   used to tagged those documents.
