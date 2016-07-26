@@ -29,12 +29,14 @@ for index, document in enumerate(documents):
 
     documents_words.append(stemmed_tokens)
 
-    for token in stemmed_tokens:
+    tokens_without_numbers = [token for token in stemmed_tokens if len([c for c
+        in list(token) if c.isdigit()]) == 0]
+    for token in tokens_without_numbers:
         texts.append(token)
 
 tokens_set = set(texts)
 
-print("Generating Document-Term Matrix (DMT)")
+print("Generating Document-Term Matrix (DTM)")
 dtm = np.empty((len(documents_words), len(tokens_set)), dtype=np.intc)
 tokens_count = len(tokens_set)
 
@@ -43,6 +45,7 @@ for token_index, token in enumerate(tokens_set):
     for doc_index, document in enumerate(documents_words):
         dtm[doc_index, token_index] = document.count(token)
 
+print("Generating LDAC data")
 doclines = list(lda_utils.dtm2ldac(dtm))
 
 print("Writing LDAC file")

@@ -23,7 +23,9 @@ for index, document in enumerate(documents):
     tokens = tokenizer.tokenize(raw_text)
     stopped_tokens = [i for i in tokens if not i in en_stop]
     stemmed_tokens = [p_stemmer.stem(i) for i in stopped_tokens]
-    for token in stemmed_tokens:
+    tokens_without_numbers = [token for token in stemmed_tokens if len([c for c
+        in list(token) if c.isdigit()]) == 0]
+    for token in tokens_without_numbers:
         texts.append(token)
 
 tokens_set = set(texts)
