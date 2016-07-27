@@ -2,3 +2,6 @@ nltk
 numpy
 lda
 stop_words
+gensim==0.13.1
+pattern
+ipdb
