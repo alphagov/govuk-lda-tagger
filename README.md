@@ -12,5 +12,5 @@ In order to install the requirements, run `pip install -r requirements.txt`.
 
 ## Run
 
-Run `python run_all.py` in order to use the LDA library to generate topics and
+Run `python run_gensim.py` in order to use the LDA library to generate topics and
 categorise the documents listed in the input file.
