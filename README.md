@@ -12,14 +12,5 @@ In order to install the requirements, run `pip install -r requirements.txt`.
 
 ## Run
 
-The scripts have to be run in sequence:
-
-1. `python generate_titles.py` - this will generate a file in `output` called
-   `data.titles`, which includes all the titles of the documents.
-2. `python generate_tokens.py` - this will generate a file in `output` called
-   `data.tokens`, which includes all the relevant tokens from the documents.
-3. `python generate_ldac.py` - this will generate a file in `output` called
-   `data.ldac`, which includes all the token count information.
-4. `python generate_topics.py` - this will generate a file in `output` called
-   `data.txt`, which includes all documents tagged and also a number of topics
-   used to tagged those documents.
+Run `python run_all.py` in order to use the LDA library to generate topics and
+categorise the documents listed in the input file.
