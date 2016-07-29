@@ -5,6 +5,7 @@ from operator import itemgetter
 from gensim import corpora, models
 from gensim.utils import lemmatize
 from gensim.parsing.preprocessing import STOPWORDS
+from gensim.models.coherencemodel import CoherenceModel
 import gensim
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -16,7 +17,8 @@ with open('input/audits_with_content.csv', 'r') as f:
     documents = list(reader)
 
 print("Remove documents without body")
-documents = [doc[2] for doc in documents if doc[2] != '']
+all_docs = [doc for doc in documents if len(doc) == 4 and doc[2] != '']
+documents = [doc[2] for doc in documents if len(doc) == 4 and doc[2] != '']
 doc_count = len(documents)
 
 # list for tokenized documents in loop
@@ -36,9 +38,8 @@ print("Convert tokenized documents into a document-term matrix")
 corpus = [dictionary.doc2bow(text) for text in texts]
 
 print("Generate LDA model")
-ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=10, id2word=dictionary, passes=10)
+ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=10, id2word=dictionary, passes=50)
 
-# Write found topics and the words associated into a file
 print("Writting topics to file")
 topics_file = open('output/gensim_topics.txt', 'w')
 topics_list = ldamodel.print_topics(num_topics=10, num_words=5)
@@ -46,7 +47,6 @@ topics_string = ['Topic {}: {}'.format(i, topic) for i, topic in topics_list]
 topics_file.write("\n".join(topics_string))
 topics_file.close()
 
-# Write tag information for each document into a file
 print("Writing tagged docs to file")
 tagged_documents_file = open('output/tagged_data.txt', 'w')
 for index, document in enumerate(documents):
@@ -55,6 +55,6 @@ for index, document in enumerate(documents):
     doc_bow = dictionary.doc2bow(doc_tokens)
     result = ldamodel[doc_bow]
     tag = max(result, key=itemgetter(1))[0]
-    tag_string = 'Document {}: Tagged with topic {}\n'.format(index+1, str(tag))
+    tag_string = 'Document {} on {}: Tagged with topic {}\n'.format(index+1, all_docs[index][0], str(tag))
     tagged_documents_file.write(tag_string)
 tagged_documents_file.close()
