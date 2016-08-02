@@ -13,6 +13,9 @@ def load_links():
 def load_base_paths():
     return [urlparse.urlparse(url).path for url in load_links()]
 
+def dev_urls():
+    return ["http://www.dev.gov.uk" + base_path + '?skip_slimmer=1' for base_path in load_base_paths()]
+
 def save_base_paths():
     base_paths_file = open('output/base_paths_file.csv', 'w')
     base_paths_file.write("\n".join(load_base_paths()))
