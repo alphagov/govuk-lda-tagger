@@ -1,4 +1,6 @@
 import csv
+import json
+import urllib2
 import urlparse
 
 def load_links():
@@ -20,3 +22,19 @@ def save_base_paths():
     base_paths_file = open('output/base_paths_file.csv', 'w')
     base_paths_file.write("\n".join(load_base_paths()))
     base_paths_file.close()
+
+def download_early_years_content():
+    content = {}
+    for base_path in load_base_paths():
+        print "Fetching content for " + base_path
+        url = 'https://www.gov.uk/api/search.json?filter_link={}&fields=indexable_content'.format(base_path)
+        response = urllib2.urlopen(url)
+        json_string = response.read()
+        data = json.loads(json_string)
+        results = data['results']
+        if len(results) > 0:
+            result = results[0]
+            if 'indexable_content' in result:
+                content[base_path] = result['indexable_content']
+
+    return content
