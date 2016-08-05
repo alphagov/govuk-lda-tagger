@@ -1,13 +1,19 @@
+import re
+import csv
+import ipdb
 import logging
 from operator import itemgetter
 from gensim import corpora, models
 from gensim.utils import lemmatize
 from gensim.parsing.preprocessing import STOPWORDS
-from gensim.models.coherencemodel import CoherenceModel
+from gensim.models import Phrases
+from nltk.corpus import stopwords
+from collections import Counter
+
 import gensim
 
 class GensimEngine:
-    def __init__(self, documents, log=False):
+    def __init__(self, documents, log=False, dictionary_path=None):
         """
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
@@ -18,11 +24,37 @@ class GensimEngine:
         self.topics = []
         self.corpus = []
         self.ldamodel = None
+        self.bigrams = []
+        self.top_bigrams = []
+        self.dictionary_path = dictionary_path
+
+        with open('input/bigrams.csv', 'r') as f:
+            reader = csv.reader(f)
+            self.top_bigrams = [bigram[0] for bigram in list(reader)]
 
         if log:
             logging.basicConfig(
                 format='%(asctime)s : %(levelname)s : %(message)s',
                 level=logging.INFO)
+
+
+    def fetch_document_bigrams(self, document_lemmas, number_of_bigrams=100):
+        """
+        Given a number of lemmas identifying a document, it calculates N bigrams
+        found in that document, where N=number_of_bigrams.
+        """
+        bigram = Phrases()
+        bigram.add_vocab([document_lemmas])
+        bigram_counter = Counter()
+
+        for key in bigram.vocab.keys():
+            if key not in stopwords.words("english"):
+                if len(key.split("_")) > 1:
+                    bigram_counter[key] += bigram.vocab[key]
+
+        found_bigrams = [bigram[0] for bigram in bigram_counter.most_common(number_of_bigrams)]
+
+        return found_bigrams
 
 
     def train(self, number_of_topics=20, words_per_topic=10, passes=50):
@@ -34,11 +66,19 @@ class GensimEngine:
         print("Generating lemmas for each of the documents")
         for document in self.documents:
             raw_text = document['text'].lower()
-            tokens = lemmatize(raw_text, stopwords=STOPWORDS)
-            self.lemmas.append(tokens)
+            all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
+            document_bigrams = self.fetch_document_bigrams(all_lemmas)
+            known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
+            document_lemmas = [lemma for lemma in all_lemmas if lemma not in ['early/JJ', 'year/JJ']]
+            self.lemmas.append(document_lemmas + known_bigrams)
 
-        print("Turn our tokenized documents into a id <-> term dictionary")
-        self.dictionary = corpora.Dictionary(self.lemmas)
+        if self.dictionary_path:
+            print("Load pre-existing dictionary from file")
+            self.dictionary = corpora.Dictionary.load_from_text('dictionary_filtered.txt')
+            self.dictionary.filter_extremes(no_below=50, no_above=3000)
+        else:
+            print("Turn our tokenized documents into a id <-> term dictionary")
+            self.dictionary = corpora.Dictionary(self.lemmas)
 
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
@@ -77,8 +117,18 @@ class GensimEngine:
         Given a single document, it returns a list of topics for the document.
         """
         raw_text = document['text'].lower()
+
+        # Extract the lemmas from the raw text
         document_lemmas = lemmatize(raw_text, stopwords=STOPWORDS)
-        document_bow = self.dictionary.doc2bow(document_lemmas)
+
+        # Extract the most common bigrams in the document
+        document_bigrams = self.fetch_document_bigrams(document_lemmas)
+        known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
+
+        # Calculate the bag of words
+        document_bow = self.dictionary.doc2bow(document_lemmas + known_bigrams)
+
+        # Tag the document
         all_tags = self.ldamodel[document_bow]
         tags = sorted(all_tags, key=itemgetter(1), reverse=True)[:top_topics]
         document['tags'] = tags
