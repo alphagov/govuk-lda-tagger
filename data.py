@@ -38,3 +38,19 @@ def download_early_years_content():
                 content[base_path] = result['indexable_content']
 
     return content
+
+def download_early_years_title_description():
+    content = {}
+    for base_path in load_base_paths():
+        print "Fetching content for " + base_path
+        url = 'https://www.gov.uk/api/search.json?filter_link={}&fields=title,description'.format(base_path)
+        response = urllib2.urlopen(url)
+        json_string = response.read()
+        data = json.loads(json_string)
+        results = data['results']
+        if len(results) > 0:
+            result = results[0]
+            if all(field in result for field in ['title', 'description']):
+                content[base_path] = result['title'] + ' ' + result['description']
+
+    return content
