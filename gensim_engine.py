@@ -1,6 +1,5 @@
 import re
 import csv
-import ipdb
 import logging
 from operator import itemgetter
 from gensim import corpora, models
@@ -69,8 +68,7 @@ class GensimEngine:
             all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
             document_bigrams = self.fetch_document_bigrams(all_lemmas)
             known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-            document_lemmas = [lemma for lemma in all_lemmas if lemma not in ['early/JJ', 'year/JJ']]
-            self.lemmas.append(document_lemmas + known_bigrams)
+            self.lemmas.append(all_lemmas + known_bigrams)
 
         if self.dictionary_path:
             print("Load pre-existing dictionary from file")
