@@ -74,8 +74,7 @@ class GensimEngine:
 
         if self.dictionary_path:
             print("Load pre-existing dictionary from file")
-            self.dictionary = corpora.Dictionary.load_from_text('dictionary_filtered.txt')
-            self.dictionary.filter_extremes(no_below=50, no_above=3000)
+            self.dictionary = corpora.Dictionary.load_from_text(self.dictionary_path)
         else:
             print("Turn our tokenized documents into a id <-> term dictionary")
             self.dictionary = corpora.Dictionary(self.lemmas)
