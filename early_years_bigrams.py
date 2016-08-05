@@ -31,16 +31,5 @@ for key in bigram.vocab.keys():
         if len(key.split("_")) > 1:
             bigram_counter[key] += bigram.vocab[key]
 
-for key, counts in bigram_counter.most_common(50):
-    print '{0: <20} {1}'.format(key.encode("utf-8"), counts)
-
-
-bigram_model = Word2Vec(bigram[sentences], size=100)
-bigram_model_counter = Counter()
-for key in bigram_model.vocab.keys():
-    if key not in stopwords.words("english"):
-        if len(key.split("_")) > 1:
-            bigram_model_counter[key] += bigram_model.vocab[key].count
-
-for key, counts in bigram_model_counter.most_common(50):
+for key, counts in bigram_counter.most_common(200):
     print '{0: <20} {1}'.format(key.encode("utf-8"), counts)
