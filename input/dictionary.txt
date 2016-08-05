@@ -219,7 +219,6 @@
 2501	potential/NN	383
 2567	period/NN	382
 1482	extra/JJ	381
-367	department/NN_education/NN	380
 562	finding/NN	380
 636	previous/JJ	379
 1985	concern/NN	379
@@ -418,7 +417,6 @@
 1464	relationship/NN	237
 1496	workforce/NN	237
 1395	culture/NN	236
-1447	prime/JJ	236
 2275	common/JJ	236
 897	allocation/NN	235
 1528	event/NN	235
@@ -871,7 +869,6 @@
 212	exclusion/NN	106
 751	deadline/NN	106
 1372	martin/NN	106
-2392	sarah/NN	106
 2777	polouse/NN	106
 439	school/NN_england/NN	105
 1129	morning/NN	105
@@ -945,7 +942,6 @@
 921	floor/NN	96
 1151	game/NN	96
 1559	variety/NN	96
-1609	gibb/NN	96
 1610	cycle/NN	96
 1994	century/NN	96
 2020	parent/NN_child/NN	96
@@ -960,8 +956,6 @@
 86	doubt/NN	94
 157	feature/NN	94
 861	kent/NN	94
-1190	prime/JJ_minister/NN	94
-1737	inequality/NN	94
 2024	engineering/NN	94
 2041	annual/JJ_report/NN	94
 289	accountable/JJ	93
@@ -1002,7 +996,6 @@
 1055	determination/NN	90
 1583	independence/NN	90
 2231	close/JJ	90
-2565	teather/NN	90
 2633	block/NN	90
 2801	reduction/NN	90
 605	selection/NN	89
@@ -1242,7 +1235,6 @@
 1631	civil/JJ	67
 1803	impressive/JJ	67
 1805	principal/JJ	67
-2419	school/NN_minister/NN	67
 2455	looked/JJ_child/NN	67
 2460	president/NN	67
 2692	annex/NN	67
@@ -1255,7 +1247,6 @@
 2228	europe/NN	66
 2530	normal/JJ	66
 2787	disabled/JJ_child/NN	66
-2795	dame/NN	66
 399	phone/NN	65
 931	teenager/NN	65
 1005	fit/JJ	65
@@ -1319,7 +1310,6 @@
 2350	comparable/JJ	62
 2490	highlighted/JJ	62
 2624	rigour/NN	62
-2632	loughton/NN	62
 2764	michael/NN_gove/NN	62
 299	actual/JJ	61
 1064	essex/NN	61
@@ -1408,7 +1398,6 @@
 2292	tower/NN	56
 2485	derby/NN	56
 2595	endowment/NN	56
-2635	child/NN_minister/NN	56
 2799	disruption/NN	56
 2828	invaluable/JJ	56
 263	northern/JJ	55
@@ -1472,7 +1461,6 @@
 375	title/NN	52
 576	trip/NN	52
 681	executive/JJ	52
-837	year/NN_year/NN	52
 850	apprentice/NN	52
 977	warning/NN	52
 1556	negative/JJ	52
@@ -1768,7 +1756,6 @@
 2446	individualised/JJ	41
 2451	tragedy/NN	41
 2588	capability/NN	41
-2599	sam/NN	41
 59	wealthier/JJ	40
 114	https/NN	40
 126	bureaucrat/NN	40
@@ -1961,7 +1948,6 @@
 1390	missing/JJ	35
 1801	oxford/JJ	35
 1851	cheaper/JJ	35
-2057	gyimah/NN	35
 2059	challenging/NN	35
 2105	identity/NN	35
 2117	thorough/JJ	35

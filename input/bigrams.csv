@@ -4,7 +4,6 @@ early/JJ_year/NN
 primary/JJ_school/NN
 year/NN_old/NN
 secondary/JJ_school/NN
-department/NN_education/NN
 secretary/NN_state/NN
 child/NN_family/NN
 pupil/NN_premium/NN
@@ -61,7 +60,6 @@ panel/NN_convene/VB
 child/NN_social/JJ
 convene/VB_consider/VB
 accordance/NN_teacher/NN
-prime/JJ_minister/NN
 date/NN_professional/JJ
 proceedings/NN_hold/VB
 outcome/NN_type/NN
@@ -130,7 +128,6 @@ announce/VB_today/NN
 order/NN_notice/NN
 disabled/JJ_child/NN
 school/NN_provide/VB
-school/NN_minister/NN
 school/NN_teacher/NN
 state/NN_education/NN
 higher/JJ_education/NN
@@ -179,7 +176,6 @@ ofsted/JJ_inspection/NN
 school/NN_food/NN
 white/JJ_paper/NN
 michael/NN_gove/NN
-child/NN_minister/NN
 standard/NN_education/NN
 coalition/NN_government/NN
 primary/NN_secondary/JJ
