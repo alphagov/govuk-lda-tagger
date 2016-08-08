@@ -12,8 +12,8 @@ with open('input/early-years-titles-descriptions.csv', 'r') as f:
 print("Prepare documents")
 documents = [{'base_path': doc[0], 'text': doc[1]} for doc in raw_documents if len(doc) == 2 and doc[1] != '']
 
-engine = GensimEngine(documents, log=True)
-engine.train(number_of_topics=20, passes=100)
+engine = GensimEngine(documents, log=True, dictionary_path='input/dictionary.txt')
+engine.train(number_of_topics=5, passes=200)
 
 print("Print topics to file")
 topics_file = open('output/early_years_title_description_topics.csv', 'w')
