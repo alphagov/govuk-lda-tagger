@@ -5,15 +5,15 @@ from documents and tag them with those topics
 
 ## Install requirements
 
+### Python version
+
 These scripts were run on python `2.7.12`. You can install it via `pyenv` and
 `python-build`. One of the dependencies is incompatible with python 3.
 
-In order to install the requirements, run `pip install -r requirements.txt`.
+### Pre-requisites
 
-### Note on dependencies
-
-Please note that one of the dependencies requires a `Fortran` compiler installed
-in your machine.
+Before you can install the requirements, please make sure you have a fortran
+compiler on your system. More on that below..
 
 I used gfortran from http://hpc.sourceforge.net/. in order to install it, I
 downloaded the specific version of gfortran for my OS version and installed it:
@@ -24,6 +24,39 @@ sudo tar -xvf gcc gfortran-5.1-bin.tar -C /
 ```
 
 This will copy the binary and other files into their expected lcoation.
+
+### Installing python dependencies
+
+Once that's done, run `pip install -r requirements.txt` in order to install all
+the python dependencies.
+
+### Post-install
+
+We use a python library called `nltk` for natural language processing. We need a
+module from `nltk` that doesn't come bundled with the library. In order to
+install that module do the following:
+
+1) Open a python console
+
+```
+$ python
+Python 2.7.12 (default, Jun 29 2016, 14:05:02)
+[GCC 4.2.1 Compatible Apple LLVM 7.3.0 (clang-703.0.31)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+```
+
+2) Import `nltk` and open its package application:
+
+```
+>>> import nltk
+>>> nltk.download()
+showing info https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/index.xml
+```
+
+3) On the GUI it opened, click on `corpora` and scroll down until you find a
+package named `stopwords`. Download that package and exit the app.
+
+At this stage you will have a working setup to run the scripts below.
 
 ## Try it out
 
