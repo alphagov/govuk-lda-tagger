@@ -1,6 +1,4 @@
-1879	school/NN	3040
 1236	child/NN	2482
-436	education/NN	2282
 1741	teacher/NN	1723
 198	local/JJ_authority/NN	1422
 2340	support/NN	1256
@@ -48,7 +46,6 @@
 1946	review/NN	621
 515	reform/NN	612
 2088	trust/NN	611
-724	approach/NN	605
 2852	leader/NN	604
 1128	home/NN	601
 1011	additional/JJ	598
@@ -69,7 +66,6 @@
 733	statutory/JJ	563
 1483	arrangement/NN	563
 676	birth/NN	561
-602	datum/NN	559
 241	academic/JJ	554
 1162	leadership/NN	553
 1337	background/NN	551
@@ -214,7 +210,6 @@
 16	reference/NN_number/NN	354
 1043	date/NN_birth/NN	354
 2587	reason/NN	354
-507	duty/NN	353
 865	circumstance/NN	352
 1381	prohibition/NN_order/NN	352
 1800	teacher/NN_reference/NN	352
@@ -232,7 +227,6 @@
 1439	disability/NN	344
 1783	key/JJ_stage/NN	342
 2562	risk/NN	342
-329	power/NN	340
 2100	page/NN	340
 1861	career/NN	339
 119	employer/NN	337
@@ -540,7 +534,6 @@
 1242	round/NN	152
 1481	useful/JJ	152
 2465	ambitious/JJ	152
-1848	gove/NN	151
 662	mainstream/JJ	150
 773	story/NN	150
 845	academy/NN_free/JJ	150
@@ -713,7 +706,6 @@
 504	search/NN	112
 596	sample/NN	112
 644	source/NN	112
-2719	spring/NN	112
 2744	delay/NN	112
 216	complete/JJ	111
 1564	population/NN	111

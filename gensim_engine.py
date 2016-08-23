@@ -56,9 +56,9 @@ class GensimEngine:
         return found_bigrams
 
 
-    def train(self, number_of_topics=20, words_per_topic=10, passes=50):
+    def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
-        It trains the LDA algorithm against the documents set in the
+        It trains the TF-IDF algorithm against the documents set in the
         initializer. We can control the number of topics we need and how many
         iterations the algorithm should make.
         """
@@ -80,9 +80,13 @@ class GensimEngine:
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
 
-        print("Generate LDA model")
+        print('Generating TF-IDF model')
+        tfidfmodel = gensim.models.TfidfModel(self.corpus)
+        corpus_tfidf = tfidfmodel[self.corpus]
+
+        print("Generate TF-IDF model")
         self.ldamodel = gensim.models.ldamodel.LdaModel(
-            self.corpus,
+            corpus_tfidf,
             num_topics=number_of_topics,
             id2word=self.dictionary,
             passes=passes)
