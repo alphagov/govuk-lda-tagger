@@ -80,13 +80,14 @@ class GensimEngine:
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
 
-        print('Generating TF-IDF model')
-        tfidfmodel = gensim.models.TfidfModel(self.corpus)
-        corpus_tfidf = tfidfmodel[self.corpus]
+        # print('Generating TF-IDF model')
+        # tfidfmodel = gensim.models.TfidfModel(self.corpus)
+        # corpus_tfidf = tfidfmodel[self.corpus]
 
         print("Generate TF-IDF model")
         self.ldamodel = gensim.models.ldamodel.LdaModel(
-            corpus_tfidf,
+            # corpus_tfidf,
+            self.corpus,
             num_topics=number_of_topics,
             id2word=self.dictionary,
             passes=passes)
