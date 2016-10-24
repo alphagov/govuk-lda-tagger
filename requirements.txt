@@ -7,3 +7,4 @@ pattern
 ipdb
 scrapy
 html2text
+pdfminer
