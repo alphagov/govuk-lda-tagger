@@ -1,6 +1,8 @@
-import re
+import argparse
 import csv
 import logging
+import re
+import sys
 from operator import itemgetter
 from gensim import corpora, models
 from gensim.utils import lemmatize
@@ -10,6 +12,9 @@ from nltk.corpus import stopwords
 from collections import Counter
 
 import gensim
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
 
 class GensimEngine:
     def __init__(self, documents, log=False, dictionary_path=None):
@@ -26,6 +31,7 @@ class GensimEngine:
         self.bigrams = []
         self.top_bigrams = []
         self.dictionary_path = dictionary_path
+        self.options = parser.parse_args()
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
@@ -42,6 +48,9 @@ class GensimEngine:
         Given a number of lemmas identifying a document, it calculates N bigrams
         found in that document, where N=number_of_bigrams.
         """
+        if not self.options.bigrams:
+            return []
+
         bigram = Phrases()
         bigram.add_vocab([document_lemmas])
         bigram_counter = Counter()
