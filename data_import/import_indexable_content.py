@@ -11,6 +11,8 @@ import argparse
 import csv
 import sys
 import time
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 HEADER = ['url', 'link', 'title', 'description', 'content', 'topics', 'organisations']
 
@@ -23,6 +25,9 @@ parser.add_argument('--wait-time', '-w', dest='wait_time', type=float, default=0
 args = parser.parse_args()
 
 session = CachedSession(cache_name='govuk_cache', backend='sqlite')
+retries = Retry(total=5, backoff_factor=args.wait_time, status_forcelist=[ 429 ])
+session.mount('http://', HTTPAdapter(max_retries=retries))
+session.mount('https://', HTTPAdapter(max_retries=retries))
 
 
 def test_base_path(original_base_path, args):
@@ -48,6 +53,8 @@ def test_base_path(original_base_path, args):
 
     if 200 <= response.status_code < 300:
         return response.url.replace('https://www.gov.uk', '').replace(args.root_url, '')
+    elif response.status_code == 429:
+        response.raise_for_status()
     else:
         if response.status_code not in (410,):
             sys.stderr.write("Unexpected response {} for {}\n".format(response.status_code, original_base_path))
@@ -159,4 +166,3 @@ if __name__ == '__main__':
     for row in fetch_rows(links_input_file=args.input_file, args=args):
         output.writerow(row)
         sys.stdout.flush()
-        time.sleep(args.wait_time)
