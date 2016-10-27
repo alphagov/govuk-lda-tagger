@@ -51,7 +51,7 @@ class GensimEngine:
                 if len(key.split("_")) > 1:
                     bigram_counter[key] += bigram.vocab[key]
 
-        found_bigrams = [bigram[0] for bigram in bigram_counter.most_common(number_of_bigrams)]
+        found_bigrams = [[bigram] * bigram_count for bigram, bigram_count in bigram_counter.most_common(number_of_bigrams)]
 
         return found_bigrams
 
