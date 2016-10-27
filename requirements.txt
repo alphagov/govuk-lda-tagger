@@ -8,3 +8,4 @@ ipdb
 scrapy
 html2text
 pdfminer
+requests_cache
