@@ -9,3 +9,4 @@ scrapy
 html2text
 pdfminer
 requests_cache
+BeautifulSoup
