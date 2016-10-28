@@ -10,6 +10,8 @@ from gensim.parsing.preprocessing import STOPWORDS
 from gensim.models import Phrases
 from nltk.corpus import stopwords
 from collections import Counter
+import pyLDAvis
+import pyLDAvis.gensim
 
 import gensim
 
@@ -145,3 +147,19 @@ class GensimEngine:
         document['tags'] = tags
 
         return document
+        
+        
+    def visualise(self):
+        """
+        Visualise the topics generated 
+        """
+        
+        # Create visualisation
+        viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)   
+        
+        # Output HTML object
+        pyLDAvis.save_html(data=viz, fileobj='output/viz.html')
+        
+        print "Saving to viz.htm"
+
+
