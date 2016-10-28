@@ -15,11 +15,12 @@ import pyLDAvis.gensim
 
 import gensim
 
-parser = argparse.ArgumentParser(description=__doc__)
+parser = argparse.ArgumentParser()
 parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
 
+
 class GensimEngine:
-    def __init__(self, documents, log=False, dictionary_path=None):
+    def __init__(self, documents, log=False, dictionary_path=None, args=()):
         """
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
@@ -33,7 +34,7 @@ class GensimEngine:
         self.bigrams = []
         self.top_bigrams = []
         self.dictionary_path = dictionary_path
-        self.options = parser.parse_args()
+        self.options = parser.parse_args(args)
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
