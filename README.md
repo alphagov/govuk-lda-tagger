@@ -80,22 +80,7 @@ and categorise the documents listed in the input file.
 For more advanced usage, there is a class that can help. In `gensim_engine.py`
 there is a class that can be used to train and run an LDA model.
 
-You can use this via the `lda_train.py` script. There are various datasets and options you can pass to it, for example:
-
-```
-lda_train.py input/early-years.csv --topics-file output/early_years_topics.csv --tags-file output/early_years_tagged_data.csv
-```
-
-This example uses the early years data from the HTML pages to derive topics.
-
-There are other scripts that use the trained model to tag other documents:
-- `early_years_curated.py` - Using the early years' audit content as training
-  data and the search API content of 700 documents to tag;
-- `early_years_titles_descriptions.py` - Using the early years' audit content as
-  training data and the search API titles and descriptions of 700 documents to
-  tag.
-
-All these scripts make use of the following API:
+This has the following API:
 
 ```
 # Instantiate an object
@@ -110,6 +95,47 @@ engine.tag(untagged_documents)
 
 Each document is expected to be a list of dictionaries, where each dictionary
 has a `base_path` key and a `text` key.
+
+The `train_lda.py` script provides a command line interface (CLI) to the GensimEngine, allowing you to customise the datasets and parameters.
+
+#### Generating topics and tags for early years
+
+Using the early years data from the HTML pages to derive topics, and tagging every document to those topics:
+
+```
+train_lda.py input/early-years.csv --output-topics output/early_years_topics.csv --output-tags output/early_years_tagged_data.csv
+```
+
+Using the early years' audit content as training data and tagging the search API titles and descriptions of 700 documents:
+
+```
+train_lda.py input/early-years-titles-descriptions.csv --output-topics output/early_years_title_description_topics.csv --output-tags output/early_years_title_description_tagged_data.csv
+```
+
+### Using a curated dictionary
+
+Pass a curated dictionary using the `--input-dictionary` option.
+
+```
+train_lda.py input/audits_with_content.csv --output-topics output/curated_early_years_topics.csv --input-dictionary input/dictionary.txt
+```
+
+## Existing Data
+
+| Filename        | Type           | Source  |
+| ------------- |-------------| -----|
+| input/all_audits_for_education.csv      | URLs with source audit | 2016 education audits |
+| input/audits_with_content.csv      | URL, Text, Audit  | 2016 education audits |
+| input/bigrams.csv | Bigram dictionary | Curated  |
+| input/dictionary.txt | Term Dictionary | Lemmatisation/bigrams for audits_with_content.csv |
+| input/early-years-audit-all-content.csv | Raw data | 2016 eudcation audit spreadsheet |
+| input/early-years-titles-descriptions.csv | URL, Text | Titles and descriptions of early years audit content |
+| input/early-years.csv | URL, Text | Content store text of early years audit content |
+| input/running-a-school-audit.csv | URL, Text | Content store text of running a school audit content |
+| expanded_audits/all_audits_for_education.csv | url,link,title,description,content,topics,organisations | Search API data for 2016 education audits |
+| expanded_audits/all_audits_for_education_words_nopdf.csv | URL, Text | Same as above, with all text combined. |
+| expanded_audits/all_audits_for_education_with_pdf_data.csv | URL, PDF data | Scraped PDF files from 2016 education audit |
+| expanded_audits/all_audits_for_education_with_pdf_and_indexable_content.csv | URL, text | Combination of above two files |
 
 ## Fetching new data
 
