@@ -3,6 +3,7 @@ import csv
 import logging
 import re
 import sys
+from itertools import chain, repeat
 from operator import itemgetter
 from gensim import corpora, models
 from gensim.utils import lemmatize
@@ -64,7 +65,12 @@ class GensimEngine:
                 if len(key.split("_")) > 1:
                     bigram_counter[key] += bigram.vocab[key]
 
-        found_bigrams = [[bigram] * bigram_count for bigram, bigram_count in bigram_counter.most_common(number_of_bigrams)]
+        bigram_iterators = [
+            repeat(bigram, bigram_count)
+            for bigram, bigram_count
+            in bigram_counter.most_common(number_of_bigrams)
+        ]
+        found_bigrams = list(chain(*bigram_iterators))
 
         return found_bigrams
 
