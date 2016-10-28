@@ -80,9 +80,15 @@ and categorise the documents listed in the input file.
 For more advanced usage, there is a class that can help. In `gensim_engine.py`
 there is a class that can be used to train and run an LDA model.
 
-There are a few scripts that make use of it:
-- `early_years.py` - Using the early years data from the HTML pages to derive
-  topics;
+You can use this via the `lda_train.py` script. There are various datasets and options you can pass to it, for example:
+
+```
+lda_train.py input/early-years.csv --topics-file output/early_years_topics.csv --tags-file output/early_years_tagged_data.csv
+```
+
+This example uses the early years data from the HTML pages to derive topics.
+
+There are other scripts that use the trained model to tag other documents:
 - `early_years_curated.py` - Using the early years' audit content as training
   data and the search API content of 700 documents to tag;
 - `early_years_titles_descriptions.py` - Using the early years' audit content as
