@@ -15,13 +15,9 @@ import pyLDAvis.gensim
 
 import gensim
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
-parser.add_argument('--save-dictionary', dest='save_dict')
-
 
 class GensimEngine:
-    def __init__(self, documents, log=False, dictionary_path=None, args=()):
+    def __init__(self, documents, log=False, dictionary_path=None, include_bigrams=True):
         """
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
@@ -35,7 +31,7 @@ class GensimEngine:
         self.bigrams = []
         self.top_bigrams = []
         self.dictionary_path = dictionary_path
-        self.options = parser.parse_args(args)
+        self.include_bigrams = include_bigrams
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
@@ -52,7 +48,7 @@ class GensimEngine:
         Given a number of lemmas identifying a document, it calculates N bigrams
         found in that document, where N=number_of_bigrams.
         """
-        if not self.options.bigrams:
+        if not self.include_bigrams:
             return []
 
         bigram = Phrases()
@@ -69,7 +65,7 @@ class GensimEngine:
         return found_bigrams
 
 
-    def train(self, number_of_topics=20, words_per_topic=8, passes=50):
+    def train(self, number_of_topics=20, words_per_topic=8, passes=50, dictionary_save_path=None):
         """
         It trains the TF-IDF algorithm against the documents set in the
         initializer. We can control the number of topics we need and how many
@@ -90,8 +86,8 @@ class GensimEngine:
             print("Turn our tokenized documents into a id <-> term dictionary")
             self.dictionary = corpora.Dictionary(self.lemmas)
 
-        if self.options.save_dict:
-            self.dictionary.save_as_text(self.options.save_dict)
+        if dictionary_save_path:
+            self.dictionary.save_as_text(dictionary_save_path)
 
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
@@ -108,7 +104,6 @@ class GensimEngine:
             id2word=self.dictionary,
             passes=passes)
 
-        print('Saving topic information')
         raw_topics = self.ldamodel.show_topics(
             num_topics=number_of_topics,
             num_words=words_per_topic,
