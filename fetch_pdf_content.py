@@ -1,5 +1,6 @@
 import os
 import csv
+import sys
 import ipdb
 import json
 import requests
@@ -88,21 +89,19 @@ def fetch_text_from_pdf_attachments(url):
 
 
 if __name__ == "__main__":
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
     results = []
     requests_cache.install_cache()
 
-    csvfile = open('output/urls_with_pdf_content.csv', 'wb')
+    csvfile = open(output_file, 'wb')
     content_writer = csv.writer(csvfile, delimiter=',')
 
-    urls = fetch_education_urls('input/all_audits_for_education.csv')
+    urls = fetch_education_urls(input_file)
     for idx, url in enumerate(urls):
         try:
             print("===> Processing URL #" + str(idx) + " - " + url)
             data = fetch_text_from_pdf_attachments(url)
             content_writer.writerow([url, data])
-        except ValueError as e:
-            print e
-            content_writer.writerow([url, ''])
-        except KeyError as e:
-            print "    => Document does not have attachments, skipping..."
+        except:
             content_writer.writerow([url, ''])
