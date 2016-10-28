@@ -17,7 +17,7 @@ import gensim
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
-parser.add_argument('--save-dictionary', dest='save_dict', action='store_false')
+parser.add_argument('--save-dictionary', dest='save_dict')
 
 
 class GensimEngine:
@@ -91,7 +91,7 @@ class GensimEngine:
             self.dictionary = corpora.Dictionary(self.lemmas)
 
         if self.options.save_dict:
-            self.dictionary.save_as_text('output/dictionary.txt')
+            self.dictionary.save_as_text(self.options.save_dict)
 
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
