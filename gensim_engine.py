@@ -17,6 +17,7 @@ import gensim
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
+parser.add_argument('--save-dictionary', dest='save_dict', action='store_false')
 
 
 class GensimEngine:
@@ -89,6 +90,9 @@ class GensimEngine:
             print("Turn our tokenized documents into a id <-> term dictionary")
             self.dictionary = corpora.Dictionary(self.lemmas)
 
+        if self.options.save_dict:
+            self.dictionary.save_as_text('output/dictionary.txt')
+
         print("Convert tokenized documents into a document-term matrix")
         self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
 
@@ -148,19 +152,19 @@ class GensimEngine:
         document['tags'] = tags
 
         return document
-        
-        
+
+
     def visualise(self):
         """
-        Visualise the topics generated 
+        Visualise the topics generated
         """
-        
+
         # Create visualisation
-        viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)   
-        
+        viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)
+
         # Output HTML object
         pyLDAvis.save_html(data=viz, fileobj='output/viz.html')
-        
+
         print "Saving to viz.htm"
 
 
