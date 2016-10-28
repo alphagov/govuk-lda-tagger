@@ -99,7 +99,7 @@ def extract_base_path(input_row):
     Extract the base path from a GOV.UK URL
     """
     try:
-        link = input_row['url']
+        link = input_row['url'].strip()
     except KeyError:
         raise KeyError('Input CSV should contain a column header "url"')
 
