@@ -104,3 +104,25 @@ engine.tag(untagged_documents)
 
 Each document is expected to be a list of dictionaries, where each dictionary
 has a `base_path` key and a `text` key.
+
+## Fetching new data
+
+### Import indexable content from the search API
+
+### Import PDF data
+
+### Combine all the data
+
+The python tool [CSVKit](https://csvkit.readthedocs.io/en/0.9.1/index.html) can be used to combine the separate CSVs into one:
+
+Note that because the columns are very wide, you will need to increase the default maximum field size:
+
+```
+csvjoin -c url all_audits_for_education.csv all_audits_for_education_with_pdf_data.csv > all_audits_for_education_with_pdf_and_indexable_content.csv --maxfieldsize [a big number]
+```
+
+The resulting CSV can then be passed to `data_import/combine_csv_columns.py` to merge everything into one "words" column.
+
+```
+python data_import/combine_csv_columns.py < all_audits_for_education_with_pdf_and_indexable_content.csv > all_audits_for_education_words.csv
+```
