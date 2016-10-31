@@ -18,6 +18,7 @@ import pyLDAvis.gensim
 import gensim
 warnings.filterwarnings('error')
 
+csv.field_size_limit(sys.maxsize)
 
 NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
 
