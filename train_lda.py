@@ -57,6 +57,10 @@ parser.add_argument(
     '--vis-filename', dest='vis_filename', metavar='FILENAME',
     help="Save visualisation of the topics to a file."
 )
+parser.add_argument(
+    '--verbose', '-v', dest='verbose', action='store_true',
+    help="Show output from LDA algorithm"
+)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -67,7 +71,7 @@ if __name__ == '__main__':
     print("Training...")
     engine = GensimEngine(
         training_documents,
-        log=True,
+        log=args.verbose,
         dictionary_path=args.dictionary,
         include_bigrams=args.bigrams,
     )
