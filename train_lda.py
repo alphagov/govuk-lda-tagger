@@ -44,7 +44,10 @@ parser.add_argument(
     '--passes', dest='passes', type=int, default=50,
     help="Number of LDA passes"
 )
-
+parser.add_argument(
+    '--vis-filename', dest='vis_filename', metavar='FILENAME',
+    help="Save visualisation of the topics to a file."
+)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -69,3 +72,7 @@ if __name__ == '__main__':
         print("Exporting tags to {}".format(args.tags_filename))
         tags = engine.tag(training_documents)
         export_tags(tags, args.tags_filename)
+
+    if args.vis_filename:
+        print("Exporting visualisation to {}".format(args.vis_filename))
+        engine.visualise(args.vis_filename)
