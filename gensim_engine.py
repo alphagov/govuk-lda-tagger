@@ -3,6 +3,7 @@ import csv
 import logging
 import re
 import sys
+import warnings
 from itertools import chain, repeat
 from operator import itemgetter
 from gensim import corpora, models
@@ -15,6 +16,11 @@ import pyLDAvis
 import pyLDAvis.gensim
 
 import gensim
+warnings.filterwarnings('error')
+
+
+NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--nobigrams', dest='bigrams', action='store_false')
@@ -61,7 +67,7 @@ class GensimEngine:
         bigram_counter = Counter()
 
         for key in bigram.vocab.keys():
-            if key not in stopwords.words("english"):
+            if key not in NLTK_ENGLISH_STOPWORDS:
                 if len(key.split("_")) > 1:
                     bigram_counter[key] += bigram.vocab[key]
 
