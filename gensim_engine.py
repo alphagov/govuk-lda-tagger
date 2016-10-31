@@ -30,15 +30,10 @@ class GensimEngine:
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
         """
-        self.documents = documents
-        self.lemmas = []
-        self.dictionary = []
         self.topics = []
-        self.corpus = []
         self.ldamodel = None
         self.bigrams = []
         self.top_bigrams = []
-        self.dictionary_path = dictionary_path
         self.include_bigrams = include_bigrams
 
         with open('input/bigrams.csv', 'r') as f:
@@ -49,6 +44,8 @@ class GensimEngine:
             logging.basicConfig(
                 format='%(asctime)s : %(levelname)s : %(message)s',
                 level=logging.INFO)
+
+        self.corpus, self.dictionary = self._build_corpus(documents, dictionary_path=dictionary_path)
 
 
     def fetch_document_bigrams(self, document_lemmas, number_of_bigrams=100):
@@ -84,30 +81,8 @@ class GensimEngine:
         initializer. We can control the number of topics we need and how many
         iterations the algorithm should make.
         """
-        print("Generating lemmas for each of the documents")
-        for document in self.documents:
-            raw_text = document['text'].lower()
-            all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
-            document_bigrams = self.fetch_document_bigrams(all_lemmas)
-            known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-            self.lemmas.append(all_lemmas + known_bigrams)
-
-        if self.dictionary_path:
-            print("Load pre-existing dictionary from file")
-            self.dictionary = corpora.Dictionary.load_from_text(self.dictionary_path)
-        else:
-            print("Turn our tokenized documents into a id <-> term dictionary")
-            self.dictionary = corpora.Dictionary(self.lemmas)
-
         if dictionary_save_path:
             self.dictionary.save_as_text(dictionary_save_path)
-
-        print("Convert tokenized documents into a document-term matrix")
-        self.corpus = [self.dictionary.doc2bow(lemma) for lemma in self.lemmas]
-
-        # print('Generating TF-IDF model')
-        # tfidfmodel = gensim.models.TfidfModel(self.corpus)
-        # corpus_tfidf = tfidfmodel[self.corpus]
 
         print("Generate TF-IDF model")
         self.ldamodel = gensim.models.ldamodel.LdaModel(
@@ -172,3 +147,32 @@ class GensimEngine:
 
         # Output HTML object
         pyLDAvis.save_html(data=viz, fileobj=filename)
+
+        print "Saving to viz.htm"
+
+
+    def _build_corpus(self, documents, dictionary_path=None):
+        """
+        Build a corpus and dictionary from the input documents.
+
+        You can load an existing dictionary file to avoid computing it
+        from scratch when retraining the model on the same input.
+        """
+        print("Generating lemmas for each of the documents")
+        lemmas = []
+        for document in documents:
+            raw_text = document['text'].lower()
+            all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
+            document_bigrams = self.fetch_document_bigrams(all_lemmas)
+            known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
+            lemmas.append(all_lemmas + known_bigrams)
+
+        if dictionary_path:
+            print("Load pre-existing dictionary from file")
+            dictionary = corpora.Dictionary.load_from_text(dictionary_path)
+        else:
+            print("Turn our tokenized documents into a id <-> term dictionary")
+            dictionary = corpora.Dictionary(lemmas)
+
+        print("Convert tokenized documents into a document-term matrix")
+        return [dictionary.doc2bow(lemma) for lemma in lemmas], dictionary
