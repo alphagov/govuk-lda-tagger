@@ -82,6 +82,32 @@ class GensimEngine:
         self.dictionary.save_as_text(dictionary_save_path)
 
 
+    def train_best_number_of_topics(self, evaluator, min_topics=1, max_topics=25, step=1, words_per_topic=8, passes=50):
+        """
+        Train an LDA model with the best number of topics.
+        """
+        best_model = None
+        best_metric = None
+        best_num_topics = None
+
+        models = self._evaluate_number_of_topics(
+                evaluator,
+                min_topics=min_topics,
+                max_topics=max_topics,
+                step=step,
+                passes=passes
+        )
+
+        for number_of_topics, model, metric in models:
+            if best_metric is None or metric > best_metric:
+                print('Current best number of topics: {} ({})'.format(number_of_topics, metric))
+                self.ldamodel = model
+                best_num_topics = number_of_topics
+                best_metric = metric
+
+        self.topics = self._extract_topics(number_of_topics=number_of_topics, words_per_topic=words_per_topic)
+
+
     def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
         It trains the TF-IDF algorithm against the documents set in the
@@ -96,12 +122,7 @@ class GensimEngine:
             id2word=self.dictionary,
             passes=passes)
 
-        raw_topics = self.ldamodel.show_topics(
-            num_topics=number_of_topics,
-            num_words=words_per_topic,
-            formatted=False)
-
-        self.topics = [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
+        self.topics = self._extract_topics(number_of_topics=number_of_topics, words_per_topic=words_per_topic)
 
 
     def tag(self, untagged_documents, top_topics=3):
@@ -180,3 +201,30 @@ class GensimEngine:
 
         print("Convert tokenized documents into a document-term matrix")
         return [dictionary.doc2bow(lemma) for lemma in lemmas], dictionary
+
+    def _extract_topics(self, number_of_topics, words_per_topic):
+        raw_topics = self.ldamodel.show_topics(
+            num_topics=number_of_topics,
+            num_words=words_per_topic,
+            formatted=False)
+
+        return [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
+
+
+    def _evaluate_number_of_topics(self, evaluator, min_topics=1, max_topics=25, step=1, passes=50):
+        """
+        Try different number of topics and evaluate each model.
+        """
+        for i in xrange(min_topics, max_topics, step):
+            print("Training model with {} topics...".format(i))
+            model = gensim.models.ldamodel.LdaModel(
+                corpus=self.corpus,
+                num_topics=i,
+                id2word = self.dictionary,
+                passes=20
+            )
+
+            print("Evalating model...".format(i))
+            metric = evaluator(model)
+
+            yield i, model, metric

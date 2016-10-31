@@ -4,6 +4,7 @@ Train an LDA model on a CSV file containing "url" and "text" columns.
 from __future__ import print_function
 import argparse
 from gensim_engine import GensimEngine
+from evaluation import ModelEvaluator
 from model_io import load_documents, export_topics, export_tags
 
 
@@ -33,8 +34,16 @@ parser.add_argument(
     help="Don't include bigrams in the model's vocabulary."
 )
 parser.add_argument(
-    '--numtopics', dest='number_of_topics', type=int, default=20,
+    '--numtopics', dest='number_of_topics', type=int, default=None,
     help="Number of topics to train"
+)
+parser.add_argument(
+    '--mintopics', dest='minimum_topics', type=int, default=1,
+    help="Minimum number of topics to train"
+)
+parser.add_argument(
+    '--maxtopics', dest='maximum_topics', type=int, default=25,
+    help="Maximum number of topics to train"
 )
 parser.add_argument(
     '--words-per-topic', dest='words_per_topic', type=int, default=8,
@@ -66,7 +75,20 @@ if __name__ == '__main__':
     if args.output_dict:
         engine.save_dictionary(args.output_dict)
 
-    engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+    training_options = dict(
+        words_per_topic=args.words_per_topic,
+        passes=args.passes
+    )
+
+    if args.number_of_topics is None:
+        engine.train_best_number_of_topics(
+            ModelEvaluator(engine.corpus),
+            min_topics=args.minimum_topics,
+            max_topics=args.maximum_topics + 1,
+            **training_options
+        )
+    else:
+        engine.train(number_of_topics=args.number_of_topics, **training_options)
 
     if args.topics_filename:
         print("Exporting topics to {}".format(args.topics_filename))
