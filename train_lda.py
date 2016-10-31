@@ -62,7 +62,11 @@ if __name__ == '__main__':
         dictionary_path=args.dictionary,
         include_bigrams=args.bigrams,
     )
-    engine.train(dictionary_save_path=args.output_dict, number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+
+    if args.output_dict:
+        engine.save_dictionary(args.output_dict)
+
+    engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
 
     if args.topics_filename:
         print("Exporting topics to {}".format(args.topics_filename))

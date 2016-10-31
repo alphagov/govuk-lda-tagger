@@ -75,15 +75,19 @@ class GensimEngine:
         return found_bigrams
 
 
-    def train(self, number_of_topics=20, words_per_topic=8, passes=50, dictionary_save_path=None):
+    def save_dictionary(self, dictionary_save_path):
+        """
+        Save the dictionary to a file
+        """
+        self.dictionary.save_as_text(dictionary_save_path)
+
+
+    def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
         It trains the TF-IDF algorithm against the documents set in the
         initializer. We can control the number of topics we need and how many
         iterations the algorithm should make.
         """
-        if dictionary_save_path:
-            self.dictionary.save_as_text(dictionary_save_path)
-
         print("Generate TF-IDF model")
         self.ldamodel = gensim.models.ldamodel.LdaModel(
             # corpus_tfidf,
