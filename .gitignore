@@ -2,3 +2,5 @@ output/
 .venv/*
 *.sqlite
 *.pyc
+.DS_Store
+.ipynb_checkpoints
