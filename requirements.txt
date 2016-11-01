@@ -11,3 +11,4 @@ pdfminer
 requests_cache
 BeautifulSoup
 pyLDAvis
+jupyter

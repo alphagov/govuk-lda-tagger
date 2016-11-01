@@ -18,6 +18,7 @@ import pyLDAvis.gensim
 import gensim
 warnings.filterwarnings('error')
 
+csv.field_size_limit(sys.maxsize)
 
 NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
 
@@ -161,7 +162,7 @@ class GensimEngine:
         return document
 
 
-    def visualise(self):
+    def visualise(self, filename):
         """
         Visualise the topics generated
         """
@@ -170,8 +171,4 @@ class GensimEngine:
         viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)
 
         # Output HTML object
-        pyLDAvis.save_html(data=viz, fileobj='output/viz.html')
-
-        print "Saving to viz.htm"
-
-
+        pyLDAvis.save_html(data=viz, fileobj=filename)
