@@ -4,6 +4,7 @@ import logging
 import re
 import sys
 import warnings
+import os
 from itertools import chain, repeat
 from operator import itemgetter
 from gensim import corpora, models
@@ -22,6 +23,62 @@ csv.field_size_limit(sys.maxsize)
 
 NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
 
+
+class Experiment(object):
+    """
+    Each experiment contains a corpus of words and an LDA model of it
+    """
+    DEFAULT_EXPERIMENT_PATH = os.path.join('output', 'models')
+
+    def __init__(self, model, corpus, dictionary):
+        self.ldamodel = model
+        self.corpus = corpus
+        self.dictionary = dictionary
+
+    @staticmethod
+    def load(experiment_name, path=DEFAULT_EXPERIMENT_PATH):
+        model_filename = Experiment._filename(path, experiment_name, 'model')
+        corpus_filename = Experiment._filename(path, experiment_name, 'corpus')
+        dictionary_filename = Experiment._filename(path, experiment_name, 'dict')
+
+        model = gensim.models.ldamodel.LdaModel.load(model_filename)
+        corpus = list(corpora.MmCorpus(corpus_filename))
+        dictionary = corpora.Dictionary.load_from_text(dictionary_filename)
+
+        return Experiment(model=model, corpus=corpus, dictionary=dictionary)
+
+    def save(self, experiment_name, path=DEFAULT_EXPERIMENT_PATH):
+        model_filename = self._filename(path, experiment_name, 'model')
+        corpus_filename = self._filename(path, experiment_name, 'corpus')
+        dictionary_filename = self._filename(path, experiment_name, 'dict')
+
+        self.ldamodel.save(model_filename)
+        corpora.MmCorpus.serialize(corpus_filename, self.corpus)
+        self.dictionary.save_as_text(dictionary_filename)
+
+    def visualise(self, filename):
+        """
+        Visualise the topics generated
+        """
+        # Create visualisation
+        viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)
+
+        # Output HTML object
+        pyLDAvis.save_html(data=viz, fileobj=filename)
+
+        print "Saving to viz.htm"
+
+    def topics(self, number_of_topics=20, words_per_topic=8):
+        raw_topics = self.ldamodel.show_topics(
+            num_topics=number_of_topics,
+            num_words=words_per_topic,
+            formatted=False)
+
+        return [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
+
+    @staticmethod
+    def _filename(path, experiment, suffix):
+        return os.path.join(path, '{}_{}'.format(experiment, suffix))
 
 
 class GensimEngine:
@@ -46,7 +103,6 @@ class GensimEngine:
                 level=logging.INFO)
 
         self.corpus, self.dictionary = self._build_corpus(documents, dictionary_path=dictionary_path)
-
 
     def fetch_document_bigrams(self, document_lemmas, number_of_bigrams=100):
         """
@@ -74,14 +130,6 @@ class GensimEngine:
 
         return found_bigrams
 
-
-    def save_dictionary(self, dictionary_save_path):
-        """
-        Save the dictionary to a file
-        """
-        self.dictionary.save_as_text(dictionary_save_path)
-
-
     def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
         It trains the TF-IDF algorithm against the documents set in the
@@ -94,15 +142,18 @@ class GensimEngine:
             self.corpus,
             num_topics=number_of_topics,
             id2word=self.dictionary,
-            passes=passes)
+            passes=passes
+        )
 
         raw_topics = self.ldamodel.show_topics(
             num_topics=number_of_topics,
             num_words=words_per_topic,
-            formatted=False)
+            formatted=False
+        )
 
         self.topics = [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
 
+        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary)
 
     def tag(self, untagged_documents, top_topics=3):
         """
@@ -115,7 +166,6 @@ class GensimEngine:
             tagged_documents.append(self.topics_for(document, top_topics))
 
         return tagged_documents
-
 
     def topics_for(self, document, top_topics=3):
         """
@@ -139,21 +189,6 @@ class GensimEngine:
         document['tags'] = tags
 
         return document
-
-
-    def visualise(self, filename):
-        """
-        Visualise the topics generated
-        """
-
-        # Create visualisation
-        viz = pyLDAvis.gensim.prepare(self.ldamodel, self.corpus, self.dictionary)
-
-        # Output HTML object
-        pyLDAvis.save_html(data=viz, fileobj=filename)
-
-        print "Saving to viz.htm"
-
 
     def _build_corpus(self, documents, dictionary_path=None):
         """
