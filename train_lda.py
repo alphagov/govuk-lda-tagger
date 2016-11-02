@@ -45,6 +45,10 @@ parser.add_argument(
     '--vis-filename', dest='vis_filename', metavar='FILENAME',
     help="Save visualisation of the topics to a file."
 )
+parser.add_argument(
+    '--use-phrasemachine', dest='use_phrasemachine', action='store_true',
+    help="Use phrasemachine instead of lemmatization when building the dictionary."
+)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -58,6 +62,7 @@ if __name__ == '__main__':
         log=True,
         dictionary_path=args.dictionary,
         include_bigrams=args.bigrams,
+        use_phrasemachine=args.use_phrasemachine
     )
 
     experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
