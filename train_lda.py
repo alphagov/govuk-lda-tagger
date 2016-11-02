@@ -3,6 +3,7 @@ Train an LDA model on a CSV file containing "url" and "text" columns.
 """
 from __future__ import print_function
 import argparse
+import datetime
 from gensim_engine import GensimEngine
 from model_io import load_documents, export_topics, export_tags
 
@@ -23,10 +24,6 @@ parser.add_argument(
 parser.add_argument(
     '--output-tags', dest='tags_filename', metavar='FILENAME',
     help='Save tagged documents to a file.'
-)
-parser.add_argument(
-    '--output-dictionary', dest='output_dict', metavar='FILENAME',
-    help="Filename to save the dictionary to. This can be loaded in next time using --input-dictionary, to speed up the process."
 )
 parser.add_argument(
     '--nobigrams', dest='bigrams', action='store_false',
@@ -63,10 +60,11 @@ if __name__ == '__main__':
         include_bigrams=args.bigrams,
     )
 
-    if args.output_dict:
-        engine.save_dictionary(args.output_dict)
+    experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
 
-    engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+    name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
+    print('Saving experiment: {}'.format(name))
+    experiment.save(name)
 
     if args.topics_filename:
         print("Exporting topics to {}".format(args.topics_filename))
@@ -79,4 +77,4 @@ if __name__ == '__main__':
 
     if args.vis_filename:
         print("Exporting visualisation to {}".format(args.vis_filename))
-        engine.visualise(args.vis_filename)
+        experiment.visualise(args.vis_filename)
