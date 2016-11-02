@@ -57,7 +57,7 @@ if __name__ == '__main__':
     training_documents = load_documents(args.training_documents)
 
     print("Training...")
-    engine = GensimEngine(
+    engine = GensimEngine.from_documents(
         training_documents,
         log=True,
         dictionary_path=args.dictionary,
