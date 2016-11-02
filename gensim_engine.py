@@ -90,12 +90,7 @@ class GensimEngine:
         self.topics = []
         self.ldamodel = None
         self.bigrams = []
-        self.top_bigrams = []
         self.include_bigrams = include_bigrams
-
-        with open('input/bigrams.csv', 'r') as f:
-            reader = csv.reader(f)
-            self.top_bigrams = [bigram[0] for bigram in list(reader)]
 
         if log:
             logging.basicConfig(
@@ -178,10 +173,9 @@ class GensimEngine:
 
         # Extract the most common bigrams in the document
         document_bigrams = self.fetch_document_bigrams(document_lemmas)
-        known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
 
         # Calculate the bag of words
-        document_bow = self.dictionary.doc2bow(document_lemmas + known_bigrams)
+        document_bow = self.dictionary.doc2bow(document_lemmas + document_bigrams)
 
         # Tag the document
         all_tags = self.ldamodel[document_bow]
@@ -203,8 +197,7 @@ class GensimEngine:
             raw_text = document['text'].lower()
             all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
             document_bigrams = self.fetch_document_bigrams(all_lemmas)
-            known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-            lemmas.append(all_lemmas + known_bigrams)
+            lemmas.append(all_lemmas + document_bigrams)
 
         if dictionary_path:
             print("Load pre-existing dictionary from file")
