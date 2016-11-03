@@ -15,6 +15,7 @@ from nltk.corpus import stopwords
 from collections import Counter
 import pyLDAvis
 import pyLDAvis.gensim
+import phrasemachine
 
 import gensim
 warnings.filterwarnings('error')
@@ -82,7 +83,7 @@ class Experiment(object):
 
 
 class GensimEngine:
-    def __init__(self, documents, log=False, dictionary_path=None, include_bigrams=True):
+    def __init__(self, documents, log=False, dictionary_path=None, include_bigrams=True, use_phrasemachine=False):
         """
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
@@ -92,6 +93,7 @@ class GensimEngine:
         self.bigrams = []
         self.top_bigrams = []
         self.include_bigrams = include_bigrams
+        self.use_phrasemachine = use_phrasemachine
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
@@ -102,7 +104,8 @@ class GensimEngine:
                 format='%(asctime)s : %(levelname)s : %(message)s',
                 level=logging.INFO)
 
-        self.corpus, self.dictionary = self._build_corpus(documents, dictionary_path=dictionary_path)
+            self.corpus, self.dictionary = \
+                self._build_corpus(documents, dictionary_path=dictionary_path)
 
     def fetch_document_bigrams(self, document_lemmas, number_of_bigrams=100):
         """
@@ -173,15 +176,12 @@ class GensimEngine:
         """
         raw_text = document['text'].lower()
 
-        # Extract the lemmas from the raw text
-        document_lemmas = lemmatize(raw_text, stopwords=STOPWORDS)
+        if self.use_phrasemachine:
+            phrases = self._phrases_in_raw_text_via_phrasemachine(raw_text)
+        else:
+            phrases = self._phrases_in_raw_text_via_lemmatisation(raw_text)
 
-        # Extract the most common bigrams in the document
-        document_bigrams = self.fetch_document_bigrams(document_lemmas)
-        known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-
-        # Calculate the bag of words
-        document_bow = self.dictionary.doc2bow(document_lemmas + known_bigrams)
+        document_bow = self.dictionary.doc2bow(phrases)
 
         # Tag the document
         all_tags = self.ldamodel[document_bow]
@@ -190,6 +190,40 @@ class GensimEngine:
 
         return document
 
+    def _phrases_in_raw_text_via_phrasemachine(self, raw_text):
+        """
+        Builds a list of phrases from raw text using phrasemachine.
+        """
+        # This returns a Dictionary of counts
+        phrase_counts = phrasemachine.get_phrases(raw_text)['counts']
+
+        print("Found the following phrases: {}".format(phrase_counts))
+
+        phrases_in_document = []
+        for unique_phrase in phrase_counts:
+            # Fetch how many times this phrase occurred
+            phrase_count = phrase_counts[unique_phrase]
+
+            # Create N strings based on the count, since LDA will do the counts
+            phrases_for_phrase_count = [unique_phrase] * phrase_count
+
+            # Now that we have the phrase repeated, add them to the final
+            # list of phrases.
+            for phrase in phrases_for_phrase_count:
+                phrases_in_document.append(phrase)
+
+        return phrases_in_document
+
+    def _phrases_in_raw_text_via_lemmatisation(self, raw_text):
+        """
+        Builds a list of lemmas from raw text using lemmatization.
+        """
+        all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
+        document_bigrams = self.fetch_document_bigrams(all_lemmas)
+        known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
+
+        return (all_lemmas + known_bigrams)
+
     def _build_corpus(self, documents, dictionary_path=None):
         """
         Build a corpus and dictionary from the input documents.
@@ -197,21 +231,21 @@ class GensimEngine:
         You can load an existing dictionary file to avoid computing it
         from scratch when retraining the model on the same input.
         """
-        print("Generating lemmas for each of the documents")
-        lemmas = []
+        print("Generating phrases for each of the documents")
+        phrases = []
         for document in documents:
             raw_text = document['text'].lower()
-            all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
-            document_bigrams = self.fetch_document_bigrams(all_lemmas)
-            known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-            lemmas.append(all_lemmas + known_bigrams)
+            if self.use_phrasemachine:
+                phrases.append(self._phrases_in_raw_text_via_phrasemachine(raw_text))
+            else:
+                phrases.append(self._phrases_in_raw_text_via_lemmatisation(raw_text))
 
         if dictionary_path:
             print("Load pre-existing dictionary from file")
             dictionary = corpora.Dictionary.load_from_text(dictionary_path)
         else:
             print("Turn our tokenized documents into a id <-> term dictionary")
-            dictionary = corpora.Dictionary(lemmas)
+            dictionary = corpora.Dictionary(phrases)
 
         print("Convert tokenized documents into a document-term matrix")
-        return [dictionary.doc2bow(lemma) for lemma in lemmas], dictionary
+        return [dictionary.doc2bow(phrase) for phrase in phrases], dictionary
