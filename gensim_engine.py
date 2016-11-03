@@ -13,16 +13,106 @@ from gensim.parsing.preprocessing import STOPWORDS
 from gensim.models import Phrases
 from nltk.corpus import stopwords
 from collections import Counter
+from corpus_building import CorpusReader
 import pyLDAvis
 import pyLDAvis.gensim
-import phrasemachine
 
 import gensim
 warnings.filterwarnings('error')
 
 csv.field_size_limit(sys.maxsize)
 
-NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
+
+class GensimEngine(object):
+    def __init__(self, corpus, dictionary, log=False, corpus_reader=None):
+        """
+        The corpus is a bag of words (a list of lists of tuples)
+        The dictionary maps word ids to strings
+        """
+        self.topics = []
+        self.ldamodel = None
+        self.corpus = corpus
+        self.dictionary = dictionary
+
+        # TODO: this shouldn't be needed
+        self.corpus_reader = corpus_reader
+
+        if log:
+            logging.basicConfig(
+                format='%(asctime)s : %(levelname)s : %(message)s',
+                level=logging.INFO)
+
+    @staticmethod
+    def from_documents(documents, log=False, dictionary_path=None, include_bigrams=True, use_phrasemachine=False):
+        """
+        Documents is expected to be a list of dictionaries, where each element
+        includes a `base_path` and `text`.
+        """
+        reader = CorpusReader(include_bigrams=include_bigrams, use_phrasemachine=use_phrasemachine)
+        corpus, dictionary = reader.build_corpus(documents, dictionary_path=dictionary_path)
+        return GensimEngine(corpus, dictionary, log=log, corpus_reader=reader)
+
+    @staticmethod
+    def from_experiment(name, log=False):
+        experiment = Experiment.load(name)
+        return GensimEngine(experiment.corpus, experiment.dictionary, log=log)
+
+    def train(self, number_of_topics=20, words_per_topic=8, passes=50):
+        """
+        It trains the TF-IDF algorithm against the documents set in the
+        initializer. We can control the number of topics we need and how many
+        iterations the algorithm should make.
+        """
+        print("Generate TF-IDF model")
+        self.ldamodel = gensim.models.ldamodel.LdaModel(
+            # corpus_tfidf,
+            self.corpus,
+            num_topics=number_of_topics,
+            id2word=self.dictionary,
+            passes=passes
+        )
+
+        raw_topics = self.ldamodel.show_topics(
+            num_topics=number_of_topics,
+            num_words=words_per_topic,
+            formatted=False
+        )
+
+        self.topics = [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
+
+        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary)
+
+    def tag(self, untagged_documents, top_topics=3):
+        """
+        Given a list of documents (dictionary with `base_path` and `text`), this
+        method adds an extra key to each of the dictionaries with the top 3
+        topics associated with the document.
+        """
+        tagged_documents = []
+        for document in untagged_documents:
+            tagged_documents.append(self.topics_for(document, top_topics))
+
+        return tagged_documents
+
+    def topics_for(self, document, top_topics=3):
+        """
+        Given a single document, it returns a list of topics for the document.
+        """
+        if self.corpus_reader is None:
+            # FIXME retrieve the document bow from the corpus
+            raise NotImplementedError
+
+        raw_text = document['text'].lower()
+
+        document_phrases = self.corpus_reader.document_bow(raw_text)
+        document_bow = self.dictionary.doc2bow(document_phrases)
+
+        # Tag the document
+        all_tags = self.ldamodel[document_bow]
+        tags = sorted(all_tags, key=itemgetter(1), reverse=True)[:top_topics]
+        document['tags'] = tags
+
+        return document
 
 
 class Experiment(object):
@@ -80,172 +170,3 @@ class Experiment(object):
     @staticmethod
     def _filename(path, experiment, suffix):
         return os.path.join(path, '{}_{}'.format(experiment, suffix))
-
-
-class GensimEngine:
-    def __init__(self, documents, log=False, dictionary_path=None, include_bigrams=True, use_phrasemachine=False):
-        """
-        Documents is expected to be a list of dictionaries, where each element
-        includes a `base_path` and `text`.
-        """
-        self.topics = []
-        self.ldamodel = None
-        self.bigrams = []
-        self.top_bigrams = []
-        self.include_bigrams = include_bigrams
-        self.use_phrasemachine = use_phrasemachine
-
-        with open('input/bigrams.csv', 'r') as f:
-            reader = csv.reader(f)
-            self.top_bigrams = [bigram[0] for bigram in list(reader)]
-
-        if log:
-            logging.basicConfig(
-                format='%(asctime)s : %(levelname)s : %(message)s',
-                level=logging.INFO)
-
-            self.corpus, self.dictionary = \
-                self._build_corpus(documents, dictionary_path=dictionary_path)
-
-    def fetch_document_bigrams(self, document_lemmas, number_of_bigrams=100):
-        """
-        Given a number of lemmas identifying a document, it calculates N bigrams
-        found in that document, where N=number_of_bigrams.
-        """
-        if not self.include_bigrams:
-            return []
-
-        bigram = Phrases()
-        bigram.add_vocab([document_lemmas])
-        bigram_counter = Counter()
-
-        for key in bigram.vocab.keys():
-            if key not in NLTK_ENGLISH_STOPWORDS:
-                if len(key.split("_")) > 1:
-                    bigram_counter[key] += bigram.vocab[key]
-
-        bigram_iterators = [
-            repeat(bigram, bigram_count)
-            for bigram, bigram_count
-            in bigram_counter.most_common(number_of_bigrams)
-        ]
-        found_bigrams = list(chain(*bigram_iterators))
-
-        return found_bigrams
-
-    def train(self, number_of_topics=20, words_per_topic=8, passes=50):
-        """
-        It trains the TF-IDF algorithm against the documents set in the
-        initializer. We can control the number of topics we need and how many
-        iterations the algorithm should make.
-        """
-        print("Generate TF-IDF model")
-        self.ldamodel = gensim.models.ldamodel.LdaModel(
-            # corpus_tfidf,
-            self.corpus,
-            num_topics=number_of_topics,
-            id2word=self.dictionary,
-            passes=passes
-        )
-
-        raw_topics = self.ldamodel.show_topics(
-            num_topics=number_of_topics,
-            num_words=words_per_topic,
-            formatted=False
-        )
-
-        self.topics = [{'topic_id': topic_id, 'words': words} for topic_id, words in raw_topics]
-
-        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary)
-
-    def tag(self, untagged_documents, top_topics=3):
-        """
-        Given a list of documents (dictionary with `base_path` and `text`), this
-        method adds an extra key to each of the dictionaries with the top 3
-        topics associated with the document.
-        """
-        tagged_documents = []
-        for document in untagged_documents:
-            tagged_documents.append(self.topics_for(document, top_topics))
-
-        return tagged_documents
-
-    def topics_for(self, document, top_topics=3):
-        """
-        Given a single document, it returns a list of topics for the document.
-        """
-        raw_text = document['text'].lower()
-
-        if self.use_phrasemachine:
-            phrases = self._phrases_in_raw_text_via_phrasemachine(raw_text)
-        else:
-            phrases = self._phrases_in_raw_text_via_lemmatisation(raw_text)
-
-        document_bow = self.dictionary.doc2bow(phrases)
-
-        # Tag the document
-        all_tags = self.ldamodel[document_bow]
-        tags = sorted(all_tags, key=itemgetter(1), reverse=True)[:top_topics]
-        document['tags'] = tags
-
-        return document
-
-    def _phrases_in_raw_text_via_phrasemachine(self, raw_text):
-        """
-        Builds a list of phrases from raw text using phrasemachine.
-        """
-        # This returns a Dictionary of counts
-        phrase_counts = phrasemachine.get_phrases(raw_text)['counts']
-
-        print("Found the following phrases: {}".format(phrase_counts))
-
-        phrases_in_document = []
-        for unique_phrase in phrase_counts:
-            # Fetch how many times this phrase occurred
-            phrase_count = phrase_counts[unique_phrase]
-
-            # Create N strings based on the count, since LDA will do the counts
-            phrases_for_phrase_count = [unique_phrase] * phrase_count
-
-            # Now that we have the phrase repeated, add them to the final
-            # list of phrases.
-            for phrase in phrases_for_phrase_count:
-                phrases_in_document.append(phrase)
-
-        return phrases_in_document
-
-    def _phrases_in_raw_text_via_lemmatisation(self, raw_text):
-        """
-        Builds a list of lemmas from raw text using lemmatization.
-        """
-        all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
-        document_bigrams = self.fetch_document_bigrams(all_lemmas)
-        known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
-
-        return (all_lemmas + known_bigrams)
-
-    def _build_corpus(self, documents, dictionary_path=None):
-        """
-        Build a corpus and dictionary from the input documents.
-
-        You can load an existing dictionary file to avoid computing it
-        from scratch when retraining the model on the same input.
-        """
-        print("Generating phrases for each of the documents")
-        phrases = []
-        for document in documents:
-            raw_text = document['text'].lower()
-            if self.use_phrasemachine:
-                phrases.append(self._phrases_in_raw_text_via_phrasemachine(raw_text))
-            else:
-                phrases.append(self._phrases_in_raw_text_via_lemmatisation(raw_text))
-
-        if dictionary_path:
-            print("Load pre-existing dictionary from file")
-            dictionary = corpora.Dictionary.load_from_text(dictionary_path)
-        else:
-            print("Turn our tokenized documents into a id <-> term dictionary")
-            dictionary = corpora.Dictionary(phrases)
-
-        print("Convert tokenized documents into a document-term matrix")
-        return [dictionary.doc2bow(phrase) for phrase in phrases], dictionary

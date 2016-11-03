@@ -103,13 +103,7 @@ The `train_lda.py` script provides a command line interface (CLI) to the GensimE
 Using the early years data from the HTML pages to derive topics, and tagging every document to those topics:
 
 ```
-train_lda.py input/early-years.csv --output-topics output/early_years_topics.csv --output-tags output/early_years_tagged_data.csv
-```
-
-Using the early years' audit content as training data and tagging the search API titles and descriptions of 700 documents:
-
-```
-train_lda.py input/early-years-titles-descriptions.csv --output-topics output/early_years_title_description_topics.csv --output-tags output/early_years_title_description_tagged_data.csv
+train_lda.py --output-topics output/early_years_topics.csv --output-tags output/early_years_tagged_data.csv import input/early-years.csv
 ```
 
 ### Using a curated dictionary
@@ -117,7 +111,7 @@ train_lda.py input/early-years-titles-descriptions.csv --output-topics output/ea
 Pass a curated dictionary using the `--input-dictionary` option.
 
 ```
-train_lda.py input/audits_with_content.csv --output-topics output/curated_early_years_topics.csv --input-dictionary input/dictionary.txt
+train_lda.py --output-topics output/curated_early_years_topics.csv import input/audits_with_content.csv --input-dictionary input/dictionary.txt
 ```
 
 ## Existing Data

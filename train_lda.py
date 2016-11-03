@@ -7,16 +7,34 @@ import datetime
 from gensim_engine import GensimEngine
 from model_io import load_documents, export_topics, export_tags
 
-
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument(
-    'training_documents', metavar='FILENAME',
+subparsers = parser.add_subparsers(help='sub-commands')
+
+import_parser = subparsers.add_parser('import', help='Import a new dataset')
+import_parser.set_defaults(command='import')
+
+refine_parser = subparsers.add_parser('refine', help='Retrain an existing experiment')
+refine_parser.set_defaults(command='refine')
+
+import_parser.add_argument(
+    'training_documents', metavar='CSV',
     help='File containing the training documents'
 )
-parser.add_argument(
-    '--input-dictionary', dest='dictionary', metavar='FILENAME',
+import_parser.add_argument(
+    '--input-dictionary', dest='dictionary', metavar='DICTIONARY',
     help='A curated dictionary file. If not specified, the dictionary will be generated from the training documents.'
 )
+import_parser.add_argument(
+    '--nobigrams', dest='bigrams', action='store_false',
+    help="Don't include bigrams in the model's vocabulary."
+)
+
+refine_parser.add_argument(
+    'experiment', metavar='EXPERIMENT',
+    help='Name of a previous experiment, eg 2016-11-01_15-44-06_695357'
+)
+
+
 parser.add_argument(
     '--output-topics', dest='topics_filename', metavar='FILENAME',
     help='Save topics data to a file.'
@@ -25,10 +43,7 @@ parser.add_argument(
     '--output-tags', dest='tags_filename', metavar='FILENAME',
     help='Save tagged documents to a file.'
 )
-parser.add_argument(
-    '--nobigrams', dest='bigrams', action='store_false',
-    help="Don't include bigrams in the model's vocabulary."
-)
+
 parser.add_argument(
     '--numtopics', dest='number_of_topics', type=int, default=20,
     help="Number of topics to train"
@@ -53,18 +68,23 @@ parser.add_argument(
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    print("Loading input file {}".format(args.training_documents))
-    training_documents = load_documents(args.training_documents)
+    if args.command == 'import':
+        print("Loading input file {}".format(args.training_documents))
+        training_documents = load_documents(args.training_documents)
+
+        engine = GensimEngine.from_documents(
+            training_documents,
+            log=True,
+            dictionary_path=args.dictionary,
+            include_bigrams=args.bigrams,
+            use_phrasemachine=args.use_phrasemachine
+        )
+
+    else:
+        print ("Loading experiment {}".format(args.experiment))
+        engine = GensimEngine.from_experiment(args.experiment, log=True)
 
     print("Training...")
-    engine = GensimEngine(
-        training_documents,
-        log=True,
-        dictionary_path=args.dictionary,
-        include_bigrams=args.bigrams,
-        use_phrasemachine=args.use_phrasemachine
-    )
-
     experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
 
     name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
