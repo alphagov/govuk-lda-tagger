@@ -157,8 +157,6 @@ class Experiment(object):
         # Output HTML object
         pyLDAvis.save_html(data=viz, fileobj=filename)
 
-        print "Saving to viz.htm"
-
     def topics(self, number_of_topics=20, words_per_topic=8):
         raw_topics = self.ldamodel.show_topics(
             num_topics=number_of_topics,
