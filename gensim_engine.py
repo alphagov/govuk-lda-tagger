@@ -104,7 +104,7 @@ class GensimEngine(object):
 
         raw_text = document['text'].lower()
 
-        document_phrases = self.corpus_reader.document_bow(raw_text)
+        document_phrases = self.corpus_reader.document_phrases(raw_text)
         document_bow = self.dictionary.doc2bow(document_phrases)
 
         # Tag the document
