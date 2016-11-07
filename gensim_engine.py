@@ -84,6 +84,22 @@ class GensimEngine(object):
 
         return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary, document_metadata=self.document_metadata)
 
+        
+    def heirach_lda(self, passes =20):
+        """
+        Use the heirachica LDA model to generate model without needing to chose number of topics 
+        """
+        print("Generate Heirachical LDA model")
+        
+        hdp = models.HdpModel(self.corpus,self.dictionary)
+        hdp_output = hdp.hdp_to_lda()
+        alpha = hdp_output[0]
+        beta = hdp_output[1]
+        hdp_lda = gensim.models.LdaModel(id2word=hdp.id2word, num_topics=len(alpha), alpha=alpha, eta=hdp.m_eta) 
+        hdp_lda.expElogbeta = np.array(beta, dtype=np.float32)
+        
+        return Experiment(model=self.hdp_lda, corpus=self.corpus, dictionary=self.dictionary)
+
 
 class Experiment(object):
     """

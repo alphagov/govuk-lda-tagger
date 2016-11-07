@@ -79,6 +79,12 @@ parser.add_argument(
     '--use-tfidf', dest='use_tfidf', action='store_true',
     help="Weight terms in a document according to TF-IDF."
 )
+parser.add_argument(
+    '--use_heirach_lda', dest='use_heirach_lda', action='store_true',
+    help="Do heirachical LDA - don't need to soecify number of topics."
+)
+
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -103,8 +109,13 @@ if __name__ == '__main__':
         engine = GensimEngine.from_experiment(args.experiment, log=True)
 
     print("Training...")
-    experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
-
+    if args.use_heirach_lda:
+    	print("A...")
+    	#experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+    else:
+    	#experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+		print("B...")
+		
     name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
     print('Saving experiment: {}'.format(name))
     experiment.save(name)
