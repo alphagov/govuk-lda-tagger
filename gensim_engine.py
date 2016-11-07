@@ -45,12 +45,12 @@ class GensimEngine(object):
                 level=logging.INFO)
 
     @staticmethod
-    def from_documents(documents, log=False, dictionary_path=None, include_bigrams=True, use_phrasemachine=False, use_tfidf=False):
+    def from_documents(documents, log=False, dictionary_path=None, **reader_kwargs):
         """
         Documents is expected to be a list of dictionaries, where each element
         includes a `base_path` and `text`.
         """
-        reader = CorpusReader(include_bigrams=include_bigrams, use_phrasemachine=use_phrasemachine, use_tfidf=use_tfidf)
+        reader = CorpusReader(**reader_kwargs)
         corpus, dictionary = reader.build_corpus(documents, dictionary_path=dictionary_path)
         document_metadata = [dict(base_path=doc['base_path']) for doc in documents]
         return GensimEngine(corpus, dictionary, log=log, corpus_reader=reader, document_metadata=document_metadata)

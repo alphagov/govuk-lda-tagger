@@ -28,7 +28,18 @@ import_parser.add_argument(
     '--nobigrams', dest='bigrams', action='store_false',
     help="Don't include bigrams in the model's vocabulary."
 )
-
+import_parser.add_argument(
+    '--no-below', dest='no_below', type=int, default=0,
+    help="Filter out words that occur less than this number of times in the corpus."
+)
+import_parser.add_argument(
+    '--no-above', dest='no_above', type=float, default=0.5,
+    help="Filter out words that make up more than this fraction of the corpus."
+)
+import_parser.add_argument(
+    '--keep-n', dest='keep_n', type=int, default=None,
+    help="Keep this many terms in the dictionary after filtering extremes."
+)
 refine_parser.add_argument(
     'experiment', metavar='EXPERIMENT',
     help='Name of a previous experiment, eg 2016-11-01_15-44-06_695357'
@@ -81,7 +92,10 @@ if __name__ == '__main__':
             dictionary_path=args.dictionary,
             include_bigrams=args.bigrams,
             use_phrasemachine=args.use_phrasemachine,
-            use_tfidf=args.use_tfidf
+            use_tfidf=args.use_tfidf,
+            no_below=args.no_below,
+            no_above=args.no_above,
+            keep_n=args.keep_n,
         )
 
     else:
