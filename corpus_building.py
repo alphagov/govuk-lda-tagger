@@ -127,6 +127,7 @@ class CorpusReader(object):
         corpus = [dictionary.doc2bow(phrase) for phrase in phrases]
 
         if self.use_tfidf:
+            print("Generate TF-IDF corpus")
             tfidfmodel = gensim.models.TfidfModel(corpus)
             corpus = tfidfmodel[corpus]
 
