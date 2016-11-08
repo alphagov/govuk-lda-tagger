@@ -64,7 +64,10 @@ parser.add_argument(
     '--use-phrasemachine', dest='use_phrasemachine', action='store_true',
     help="Use phrasemachine instead of lemmatization when building the dictionary."
 )
-
+parser.add_argument(
+    '--use-tfidf', dest='use_tfidf', action='store_true',
+    help="Weight terms in a document according to TF-IDF."
+)
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -77,7 +80,8 @@ if __name__ == '__main__':
             log=True,
             dictionary_path=args.dictionary,
             include_bigrams=args.bigrams,
-            use_phrasemachine=args.use_phrasemachine
+            use_phrasemachine=args.use_phrasemachine,
+            use_tfidf=args.use_tfidf
         )
 
     else:

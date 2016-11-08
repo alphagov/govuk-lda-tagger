@@ -27,9 +27,10 @@ class CorpusReader(object):
     """
     Extract terms and phrases from raw text to run LDA on.
     """
-    def __init__(self, include_bigrams=True, use_phrasemachine=False):
+    def __init__(self, include_bigrams=True, use_phrasemachine=False, use_tfidf=False):
         self.include_bigrams = include_bigrams
         self.use_phrasemachine = use_phrasemachine
+        self.use_tfidf = use_tfidf
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
@@ -95,7 +96,14 @@ class CorpusReader(object):
             dictionary = corpora.Dictionary(phrases)
 
         print("Convert tokenized documents into a document-term matrix")
-        return [dictionary.doc2bow(phrase) for phrase in phrases], dictionary
+        corpus = [dictionary.doc2bow(phrase) for phrase in phrases]
+
+        if self.use_tfidf:
+            tfidfmodel = gensim.models.TfidfModel(corpus)
+            corpus = tfidfmodel[corpus]
+
+
+        return corpus, dictionary
 
     def _phrases_in_raw_text_via_phrasemachine(self, raw_text):
         """
