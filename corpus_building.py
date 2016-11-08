@@ -1,3 +1,4 @@
+import glob
 import argparse
 import csv
 import logging
@@ -19,8 +20,28 @@ import phrasemachine
 
 import gensim
 
+PUNCTUATION_REGEX = re.compile(r'\W|[_0-9]', flags=re.UNICODE)
 
-NLTK_ENGLISH_STOPWORDS = [word.encode('utf8') for word in stopwords.words('english')]
+def load_stopwords():
+    stopwords = []
+    for filename in glob.glob('stopwords/*.txt'):
+        with open(filename) as fileobj:
+            for line in fileobj:
+                line = remove_punctuation(line.decode('utf8'))
+                if line:
+                    stopwords.append(line.lower())
+    return stopwords + [word.decode('utf8') for word in STOPWORDS]
+
+
+def remove_punctuation(word):
+    """
+    Remove all punctuation and numbers from a word
+    """
+    return PUNCTUATION_REGEX.sub('', word)
+
+
+STOPWORDS_UNICODE = load_stopwords()
+STOPWORDS_BYTES = [word.encode('utf8') for word in STOPWORDS_UNICODE]
 
 
 class CorpusReader(object):
@@ -60,7 +81,7 @@ class CorpusReader(object):
         bigram_counter = Counter()
 
         for key in bigram.vocab.keys():
-            if key not in NLTK_ENGLISH_STOPWORDS:
+            if key not in STOPWORDS_BYTES:
                 if len(key.split("_")) > 1:
                     bigram_counter[key] += bigram.vocab[key]
 
@@ -133,7 +154,7 @@ class CorpusReader(object):
         """
         Builds a list of lemmas from raw text using lemmatization.
         """
-        all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS)
+        all_lemmas = lemmatize(raw_text, allowed_tags=re.compile('(NN|JJ)'), stopwords=STOPWORDS_UNICODE)
         document_bigrams = self.fetch_document_bigrams(all_lemmas)
         known_bigrams = [bigram for bigram in document_bigrams if bigram in self.top_bigrams]
 
