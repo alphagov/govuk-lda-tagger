@@ -101,7 +101,7 @@ if __name__ == '__main__':
 
     if args.tags_filename:
         print("Exporting tags to {}".format(args.tags_filename))
-        tags = engine.tag(training_documents)
+        tags = experiment.tag()
         export_tags(tags, args.tags_filename)
 
     if args.vis_filename:
