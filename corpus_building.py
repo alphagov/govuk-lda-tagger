@@ -27,10 +27,13 @@ class CorpusReader(object):
     """
     Extract terms and phrases from raw text to run LDA on.
     """
-    def __init__(self, include_bigrams=True, use_phrasemachine=False, use_tfidf=False):
+    def __init__(self, include_bigrams=True, use_phrasemachine=False, use_tfidf=False, no_below=5, no_above=0.5, keep_n=None):
         self.include_bigrams = include_bigrams
         self.use_phrasemachine = use_phrasemachine
         self.use_tfidf = use_tfidf
+        self.no_below = no_below
+        self.no_above = no_above
+        self.keep_n = keep_n
 
         with open('input/bigrams.csv', 'r') as f:
             reader = csv.reader(f)
@@ -94,6 +97,9 @@ class CorpusReader(object):
         else:
             print("Turn our tokenized documents into a id <-> term dictionary")
             dictionary = corpora.Dictionary(phrases)
+
+            # Filter out very (in)frequent words. This changes the id <-> term mapping.
+            dictionary.filter_extremes(no_below=self.no_below, no_above=self.no_above, keep_n=self.keep_n)
 
         print("Convert tokenized documents into a document-term matrix")
         corpus = [dictionary.doc2bow(phrase) for phrase in phrases]
