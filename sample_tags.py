@@ -15,9 +15,9 @@ sample = random.sample(rows, 20)
 
 for row in sample:
     link, rest = row.strip().split(',', 1)
-    print u'### {}'.format(link)
+    print(u'### {}'.format(link))
     tags = ast.literal_eval(rest)
     for topic_id, prob in tags:
-        print u'- Topic {} ({:.0f}%)'.format(topic_id, prob * 100)
-    print u''
+        print(u'- Topic {} ({:.0f}%)'.format(topic_id, prob * 100))
+    print(u'')
 

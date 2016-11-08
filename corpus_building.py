@@ -108,7 +108,7 @@ class CorpusReader(object):
         print("Generating lemmas for each of the documents")
         phrases = []
         for index, document in enumerate(documents):
-            print "[{}] processing {}".format(str(index), document['base_path'])
+            print("[{}] processing {}".format(str(index), document['base_path']))
             raw_text = document['text'].lower()
 
             phrases.append(self.document_phrases(raw_text))
