@@ -107,7 +107,8 @@ class CorpusReader(object):
         """
         print("Generating lemmas for each of the documents")
         phrases = []
-        for document in documents:
+        for index, document in enumerate(documents):
+            print("[{}] processing {}".format(str(index), document['base_path']))
             raw_text = document['text'].lower()
 
             phrases.append(self.document_phrases(raw_text))
@@ -126,6 +127,7 @@ class CorpusReader(object):
         corpus = [dictionary.doc2bow(phrase) for phrase in phrases]
 
         if self.use_tfidf:
+            print("Generate TF-IDF corpus")
             tfidfmodel = gensim.models.TfidfModel(corpus)
             corpus = tfidfmodel[corpus]
 

@@ -99,7 +99,7 @@ if __name__ == '__main__':
         )
 
     else:
-        print ("Loading experiment {}".format(args.experiment))
+        print("Loading experiment {}".format(args.experiment))
         engine = GensimEngine.from_experiment(args.experiment, log=True)
 
     print("Training...")

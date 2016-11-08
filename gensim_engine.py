@@ -62,13 +62,12 @@ class GensimEngine(object):
 
     def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
-        It trains the TF-IDF algorithm against the documents set in the
+        It trains the LDA algorithm against the documents set in the
         initializer. We can control the number of topics we need and how many
         iterations the algorithm should make.
         """
-        print("Generate TF-IDF model")
+        print("Generate LDA model")
         self.ldamodel = gensim.models.ldamodel.LdaModel(
-            # corpus_tfidf,
             self.corpus,
             num_topics=number_of_topics,
             id2word=self.dictionary,
