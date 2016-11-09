@@ -17,6 +17,7 @@ from collections import Counter
 from corpus_building import CorpusReader
 import pyLDAvis
 import pyLDAvis.gensim
+import numpy as np
 
 import gensim
 warnings.filterwarnings('error')
@@ -91,14 +92,11 @@ class GensimEngine(object):
         """
         print("Generate Heirachical LDA model")
         
-        hdp = models.HdpModel(self.corpus,self.dictionary)
-        hdp_output = hdp.hdp_to_lda()
-        alpha = hdp_output[0]
-        beta = hdp_output[1]
-        hdp_lda = gensim.models.LdaModel(id2word=hdp.id2word, num_topics=len(alpha), alpha=alpha, eta=hdp.m_eta) 
-        hdp_lda.expElogbeta = np.array(beta, dtype=np.float32)
+        self.ldamodel = models.HdpModel(self.corpus, self.dictionary)
+             
+        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary)
         
-        return Experiment(model=self.hdp_lda, corpus=self.corpus, dictionary=self.dictionary)
+
 
 
 class Experiment(object):

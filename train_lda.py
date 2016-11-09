@@ -16,6 +16,7 @@ import_parser.set_defaults(command='import')
 refine_parser = subparsers.add_parser('refine', help='Retrain an existing experiment')
 refine_parser.set_defaults(command='refine')
 
+
 import_parser.add_argument(
     'training_documents', metavar='CSV',
     help='File containing the training documents'
@@ -80,8 +81,8 @@ parser.add_argument(
     help="Weight terms in a document according to TF-IDF."
 )
 parser.add_argument(
-    '--use_heirach_lda', dest='use_heirach_lda', action='store_true',
-    help="Do heirachical LDA - don't need to soecify number of topics."
+    '--use-heirach-lda', dest='use_heirach_lda', action='store_true',
+    help="Do heirachical LDA - don't need to specify number of topics."
 )
 
 
@@ -110,11 +111,12 @@ if __name__ == '__main__':
 
     print("Training...")
     if args.use_heirach_lda:
-    	print("A...")
-    	#experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+    	print("Herirachical LDA")
+    	experiment = engine.heirach_lda(passes=args.passes)
     else:
-    	#experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
-		print("B...")
+    	print("Standard LDA")
+    	experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
+
 		
     name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
     print('Saving experiment: {}'.format(name))
