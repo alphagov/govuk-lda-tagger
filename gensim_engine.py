@@ -92,11 +92,10 @@ class GensimEngine(object):
         """
         print("Generate Heirachical LDA model")
         
-        self.ldamodel = models.HdpModel(self.corpus, self.dictionary)
+        self.ldamodel = models.HdpModel(self.corpus, self.dictionary, T=100)
              
-        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary)
+        return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary, document_metadata=self.document_metadata)
         
-
 
 
 class Experiment(object):
