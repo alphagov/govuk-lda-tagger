@@ -57,9 +57,9 @@ class GensimEngine(object):
         return GensimEngine(corpus, dictionary, log=log, corpus_reader=reader, document_metadata=document_metadata)
 
     @staticmethod
-    def from_experiment(name, log=False):
-        experiment = Experiment.load(name)
-        return GensimEngine(experiment.corpus, experiment.dictionary, experiment.document_metadata, log=log)
+    def from_experiment(name, is_hierarchical=False, log=False):
+        experiment = Experiment.load(name, is_hierarchical=is_hierarchical)
+        return GensimEngine(experiment.corpus, experiment.dictionary, log=log, document_metadata=experiment.document_metadata)
 
     def train(self, number_of_topics=20, words_per_topic=8, passes=50):
         """
@@ -85,17 +85,15 @@ class GensimEngine(object):
 
         return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary, document_metadata=self.document_metadata)
 
-        
     def heirach_lda(self, passes =20):
         """
-        Use the heirachica LDA model to generate model without needing to chose number of topics 
+        Use the heirachica LDA model to generate model without needing to chose number of topics
         """
         print("Generate Heirachical LDA model")
-        
+
         self.ldamodel = models.HdpModel(self.corpus, self.dictionary, T=100)
-             
+
         return Experiment(model=self.ldamodel, corpus=self.corpus, dictionary=self.dictionary, document_metadata=self.document_metadata)
-        
 
 
 class Experiment(object):
@@ -111,13 +109,19 @@ class Experiment(object):
         self.document_metadata = document_metadata  # List of document metadata
 
     @staticmethod
-    def load(experiment_name, path=DEFAULT_EXPERIMENT_PATH):
+    def load(experiment_name, is_hierarchical=False, path=DEFAULT_EXPERIMENT_PATH):
         model_filename = Experiment._filename(path, experiment_name, 'model')
         corpus_filename = Experiment._filename(path, experiment_name, 'corpus')
         dictionary_filename = Experiment._filename(path, experiment_name, 'dict')
         meta_filename = Experiment._filename(path, experiment_name, 'meta')
 
-        model = gensim.models.ldamodel.LdaModel.load(model_filename)
+        if is_hierarchical:
+            model_class = models.HdpModel
+        else:
+            model_class = gensim.models.ldamodel.LdaModel
+
+        model = model_class.load(model_filename)
+
         corpus = list(corpora.MmCorpus(corpus_filename))
         dictionary = corpora.Dictionary.load_from_text(dictionary_filename)
 

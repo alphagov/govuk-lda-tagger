@@ -106,8 +106,8 @@ if __name__ == '__main__':
         )
 
     else:
-        print("Loading experiment {}".format(args.experiment))
-        engine = GensimEngine.from_experiment(args.experiment, log=True)
+        print ("Loading experiment {}".format(args.experiment))
+        engine = GensimEngine.from_experiment(args.experiment, log=True, is_hierarchical=args.use_heirach_lda)
 
     print("Training...")
     if args.use_heirach_lda:
