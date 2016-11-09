@@ -17,6 +17,7 @@ from collections import Counter
 import pyLDAvis
 import pyLDAvis.gensim
 import phrasemachine
+import textacy
 
 import gensim
 
@@ -48,9 +49,12 @@ class CorpusReader(object):
     """
     Extract terms and phrases from raw text to run LDA on.
     """
-    def __init__(self, include_bigrams=True, use_phrasemachine=False, use_tfidf=False, no_below=5, no_above=0.5, keep_n=None):
+    def __init__(self, include_bigrams=True, use_phrasemachine=False, use_textacy=False, use_lemmatisation=False, use_tfidf=False, no_below=20, no_above=0.15, keep_n=None):
         self.include_bigrams = include_bigrams
+
         self.use_phrasemachine = use_phrasemachine
+        self.use_textacy = use_textacy
+        self.use_lemmatisation = use_lemmatisation
         self.use_tfidf = use_tfidf
         self.no_below = no_below
         self.no_above = no_above
@@ -64,10 +68,16 @@ class CorpusReader(object):
         """
         Extract some kind of n-grams from a document
         """
+        phrases = []
+
         if self.use_phrasemachine:
-            phrases = self._phrases_in_raw_text_via_phrasemachine(raw_text)
-        else:
-            phrases = self._phrases_in_raw_text_via_lemmatisation(raw_text)
+            phrases += self._phrases_in_raw_text_via_phrasemachine(raw_text)
+
+        if self.use_lemmatisation:
+            phrases += self._phrases_in_raw_text_via_lemmatisation(raw_text)
+
+        if self.use_textacy:
+            phrases += self._phrases_in_raw_text_via_textacy(raw_text)
 
         return phrases
 
@@ -133,6 +143,27 @@ class CorpusReader(object):
 
 
         return corpus, dictionary
+
+    def _phrases_in_raw_text_via_textacy(self, raw_text):
+        """
+        Builds a list of phrases from raw text using textacy.
+        """
+        all_lemmas = lemmatize(raw_text, stopwords=STOPWORDS_UNICODE)
+        curated_words = [word.split('/')[0] for word in all_lemmas]
+        curated_text = ' '.join(curated_words)
+
+        doc = textacy.Doc(unicode(curated_text.decode('ascii', 'ignore')), lang=u'en')
+
+        all_phrases = []
+        all_phrases += textacy.extract.ngrams(doc, 2, filter_stops=True, filter_punct=True, filter_nums=True)
+        all_phrases += textacy.extract.ngrams(doc, 3, filter_stops=True, filter_punct=True, filter_nums=True)
+        all_phrases += textacy.extract.ngrams(doc, 4, filter_stops=True, filter_punct=True, filter_nums=True)
+        all_phrases += textacy.extract.ngrams(doc, 5, filter_stops=True, filter_punct=True, filter_nums=True)
+
+        phrases = [unicode(phrase) for phrase in all_phrases]
+        print(phrases)
+
+        return phrases
 
     def _phrases_in_raw_text_via_phrasemachine(self, raw_text):
         """

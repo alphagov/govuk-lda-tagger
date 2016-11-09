@@ -14,3 +14,4 @@ BeautifulSoup==3.2.1
 pyLDAvis==2.0.0
 jupyter==1.0.0
 phrasemachine==1.0.1
+textacy==0.3.1
