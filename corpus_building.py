@@ -18,27 +18,32 @@ import pyLDAvis
 import pyLDAvis.gensim
 import phrasemachine
 import textacy
+from textacy import preprocess
 
 import gensim
 
 PUNCTUATION_REGEX = re.compile(r'\W|[_0-9]', flags=re.UNICODE)
+
+def preprocess_unicode(raw_text):
+    raw_text = preprocess.transliterate_unicode(raw_text.lower())
+    raw_text = preprocess.replace_urls(raw_text, replace_with=u'')
+    raw_text = preprocess.replace_emails(raw_text, replace_with=u'')
+    raw_text = preprocess.replace_phone_numbers(raw_text, replace_with=u'')
+    raw_text = preprocess.replace_numbers(raw_text, replace_with=u'')
+    raw_text = preprocess.replace_currency_symbols(raw_text, replace_with=u'')
+    return raw_text
 
 def load_stopwords():
     stopwords = []
     for filename in glob.glob('stopwords/*.txt'):
         with open(filename) as fileobj:
             for line in fileobj:
-                line = remove_punctuation(line.decode('utf8'))
+                line = preprocess_unicode(line.decode('utf8').strip())
+                line = preprocess.remove_punct(line)
                 if line:
-                    stopwords.append(line.lower())
+                    stopwords.append(line)
+
     return stopwords + [word.decode('utf8') for word in STOPWORDS]
-
-
-def remove_punctuation(word):
-    """
-    Remove all punctuation and numbers from a word
-    """
-    return PUNCTUATION_REGEX.sub('', word)
 
 
 STOPWORDS_UNICODE = load_stopwords()
@@ -119,7 +124,7 @@ class CorpusReader(object):
         phrases = []
         for index, document in enumerate(documents):
             print("[{}] processing {}".format(str(index), document['base_path']))
-            raw_text = document['text'].lower()
+            raw_text = preprocess_unicode(document['text'].decode('utf8'))
 
             phrases.append(self.document_phrases(raw_text))
 
@@ -171,8 +176,6 @@ class CorpusReader(object):
         """
         # This returns a Dictionary of counts
         phrase_counts = phrasemachine.get_phrases(raw_text)['counts']
-
-        print("Found the following phrases: {}".format(phrase_counts))
 
         phrases_in_document = []
         for unique_phrase in phrase_counts:
