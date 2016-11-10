@@ -135,7 +135,33 @@ train_lda.py --output-topics output/curated_early_years_topics.csv import input/
 
 ### Import indexable content from the search API
 
+In order to fetch data from the search API, prepare a CSV input file containing
+one column (with the `URL` header) and the `base_path` of the links we wish to
+fetch content for.
+
+Then run the following command:
+
+```
+python import_indexable_content.py --environemnt https://www.gov.uk input_file.csv
+```
+
+This script outputs CSV rows with the title, description, indexable content,
+topic names and organisation names.
+
 ### Import PDF data
+
+In order to fetch PDF text from a number of GOV.UK base paths, prepare a CSV
+input file containing one column (with the `URL` header) and the `base_path` of
+the links we wish to fetch content for.
+
+Then, run the following command:
+
+```
+python fetch_pdf_content.py input_file.csv output_file.csv
+```
+
+The output file will include the same base paths and also the text found in all
+PDF attachments, merged into one big string.
 
 ### Combine all the data
 
