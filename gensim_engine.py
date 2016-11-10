@@ -89,7 +89,7 @@ class Experiment(object):
     """
     Each experiment contains a corpus of words and an LDA model of it
     """
-    DEFAULT_EXPERIMENT_PATH = os.path.join('output', 'models')
+    DEFAULT_EXPERIMENT_PATH = os.path.join('experiments')
 
     def __init__(self, model, corpus, dictionary, document_metadata):
         self.ldamodel = model                       # Trained LDA model
@@ -171,4 +171,4 @@ class Experiment(object):
 
     @staticmethod
     def _filename(path, experiment, suffix):
-        return os.path.join(path, '{}_{}'.format(experiment, suffix))
+        return os.path.join(path, experiment, 'models', suffix)
