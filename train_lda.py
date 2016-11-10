@@ -76,6 +76,14 @@ parser.add_argument(
     help="Use phrasemachine instead of lemmatization when building the dictionary."
 )
 parser.add_argument(
+    '--use-textacy', dest='use_textacy', action='store_true',
+    help='Use textacy to generate bigrams/noun phrases'
+)
+parser.add_argument(
+    '--use-lemmatisation', dest='use_lemmatisation', action='store_true',
+    help='Use lemmatisation to refine input text'
+)
+parser.add_argument(
     '--use-tfidf', dest='use_tfidf', action='store_true',
     help="Weight terms in a document according to TF-IDF."
 )
@@ -92,6 +100,8 @@ if __name__ == '__main__':
             dictionary_path=args.dictionary,
             include_bigrams=args.bigrams,
             use_phrasemachine=args.use_phrasemachine,
+            use_textacy=args.use_textacy,
+            use_lemmatisation=args.use_lemmatisation,
             use_tfidf=args.use_tfidf,
             no_below=args.no_below,
             no_above=args.no_above,
