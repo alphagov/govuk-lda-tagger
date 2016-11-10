@@ -4,6 +4,7 @@ Train an LDA model on a CSV file containing "url" and "text" columns.
 from __future__ import print_function
 import argparse
 import datetime
+import os
 from gensim_engine import GensimEngine
 from model_io import load_documents, export_topics, export_tags
 
@@ -40,6 +41,10 @@ import_parser.add_argument(
     '--keep-n', dest='keep_n', type=int, default=None,
     help="Keep this many terms in the dictionary after filtering extremes."
 )
+import_parser.add_argument(
+    '--experiment', dest='experiment', default=None,
+    help="Name of experiment"
+)
 refine_parser.add_argument(
     'experiment', metavar='EXPERIMENT',
     help='Name of a previous experiment, eg 2016-11-01_15-44-06_695357'
@@ -47,11 +52,11 @@ refine_parser.add_argument(
 
 
 parser.add_argument(
-    '--output-topics', dest='topics_filename', metavar='FILENAME',
+    '--output-topics', dest='topics_filename', metavar='FILENAME', default=None,
     help='Save topics data to a file.'
 )
 parser.add_argument(
-    '--output-tags', dest='tags_filename', metavar='FILENAME',
+    '--output-tags', dest='tags_filename', metavar='FILENAME', default=None,
     help='Save tagged documents to a file.'
 )
 
@@ -68,7 +73,7 @@ parser.add_argument(
     help="Number of LDA passes"
 )
 parser.add_argument(
-    '--vis-filename', dest='vis_filename', metavar='FILENAME',
+    '--vis-filename', dest='vis_filename', metavar='FILENAME', default=None,
     help="Save visualisation of the topics to a file."
 )
 parser.add_argument(
@@ -80,17 +85,27 @@ parser.add_argument(
     help='Use textacy to generate bigrams/noun phrases'
 )
 parser.add_argument(
-    '--use-lemmatisation', dest='use_lemmatisation', action='store_true',
+    '--no-lemmatisation', dest='use_lemmatisation', action='store_false',
     help='Use lemmatisation to refine input text'
 )
 parser.add_argument(
     '--use-tfidf', dest='use_tfidf', action='store_true',
     help="Weight terms in a document according to TF-IDF."
 )
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
+    experiment_name = args.experiment
+    if experiment_name is None:
+        experiment_name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
+
+    experiment_path = os.path.join('experiments', experiment_name)
+
     if args.command == 'import':
+        os.makedirs(experiment_path)
+        os.makedirs(os.path.join(experiment_path, 'models'))
+
         print("Loading input file {}".format(args.training_documents))
         training_documents = load_documents(args.training_documents)
 
@@ -109,25 +124,24 @@ if __name__ == '__main__':
         )
 
     else:
-        print("Loading experiment {}".format(args.experiment))
-        engine = GensimEngine.from_experiment(args.experiment, log=True)
+        print("Loading experiment {}".format(experiment_name))
+        engine = GensimEngine.from_experiment(experiment_name, log=True)
 
     print("Training...")
     experiment = engine.train(number_of_topics=args.number_of_topics, words_per_topic=args.words_per_topic, passes=args.passes)
 
-    name = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S_%f')
-    print('Saving experiment: {}'.format(name))
-    experiment.save(name)
+    print('Saving experiment: {}'.format(experiment_name))
+    experiment.save(experiment_name)
 
-    if args.topics_filename:
-        print("Exporting topics to {}".format(args.topics_filename))
-        export_topics(engine.topics, args.topics_filename)
+    topics_filename = args.topics_filename or os.path.join(experiment_path, 'topics')
+    print("Exporting topics to {}".format(topics_filename))
+    export_topics(engine.topics, topics_filename)
 
-    if args.tags_filename:
-        print("Exporting tags to {}".format(args.tags_filename))
-        tags = experiment.tag()
-        export_tags(tags, args.tags_filename)
+    tags_filename = args.tags_filename or os.path.join(experiment_path, 'tags')
+    print("Exporting tags to {}".format(tags_filename))
+    tags = experiment.tag()
+    export_tags(tags, tags_filename)
 
-    if args.vis_filename:
-        print("Exporting visualisation to {}".format(args.vis_filename))
-        experiment.visualise(args.vis_filename)
+    vis_filename = args.vis_filename or os.path.join(experiment_path, 'vis.html')
+    print("Exporting visualisation to {}".format(vis_filename))
+    experiment.visualise(vis_filename)
