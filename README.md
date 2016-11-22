@@ -10,6 +10,18 @@ The output of each experiment is in the `experiments` directory.
 
 Example results: [Education theme - all audits - all data excluding PDF](https://nbviewer.jupyter.org/github/alphagov/govuk-lda-tagger/blob/master/experiments/20_topics_without_pdf_data_tfidf/tfidf.ipynb#topic=0&lambda=0.21&term=)
 
+## Nomenclature
+
+- **Document**: a chunk of text representing a page on GOV.UK.
+- **Base path**: The relative URL to a page on GOV.UK.
+- **Corpus**: a set of documents.
+- **Term**: a single word, phrase, or [n-gram](https://en.wikipedia.org/wiki/N-gram). We break a document into many terms before running the LDA algorithm.
+- **Dictionary**: a data structure that maps every term to an integer ID.
+- **Stopwords**: terms we want the algorithm to ignore - these won't be included in the dictionary.
+- **Document term matrix**: [a data structure that captures how frequently terms appear in different documents](https://en.wikipedia.org/wiki/Document-term_matrix).
+- **TF-IDF**: [Term Frequency - Inverse Document Frequency](https://en.wikipedia.org/wiki/Tf%E2%80%93idf). A measure that shows how important a word is to a document in a corpus.
+- **LDA**: [Latent Dirichlet Allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) - the algorithm we're using to model topics.
+
 ## Install requirements
 
 ### Python version
@@ -192,3 +204,7 @@ The resulting CSV can then be passed to `data_import/combine_csv_columns.py` to 
 ```
 python data_import/combine_csv_columns.py < all_audits_for_education_with_pdf_and_indexable_content.csv > all_audits_for_education_words.csv
 ```
+
+## Licence
+
+[MIT License](LICENCE.txt)
