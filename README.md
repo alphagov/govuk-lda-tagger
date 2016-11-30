@@ -1,7 +1,26 @@
-# Tag documents with the LDA algorithm
+# Tag GOV.UK documents with the LDA algorithm
 
-An experiment of using the LDA machine learning algorithm to generate topics
-from documents and tag them with those topics
+This project contains several experiments that used the [LDA](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) machine learning algorithm to generate topics from pages on [GOV.UK](https://www.gov.uk) and tag them with those topics.
+
+## Results
+
+The output of each experiment is in the `experiments` directory.
+
+[You can open any of the ipython notebooks in nbviewer](https://nbviewer.jupyter.org/github/alphagov/govuk-lda-tagger/tree/master/experiments/).
+
+Example results: [Education theme - all audits - all data excluding PDF](https://nbviewer.jupyter.org/github/alphagov/govuk-lda-tagger/blob/master/experiments/20_topics_without_pdf_data_tfidf/tfidf.ipynb#topic=0&lambda=0.21&term=)
+
+## Nomenclature
+
+- **Document**: a chunk of text representing a page on GOV.UK.
+- **Base path**: The relative URL to a page on GOV.UK.
+- **Corpus**: a set of documents.
+- **Term**: a single word, phrase, or [n-gram](https://en.wikipedia.org/wiki/N-gram). We break a document into many terms before running the LDA algorithm.
+- **Dictionary**: a data structure that maps every term to an integer ID.
+- **Stopwords**: terms we want the algorithm to ignore - these won't be included in the dictionary.
+- **Document term matrix**: [a data structure that captures how frequently terms appear in different documents](https://en.wikipedia.org/wiki/Document-term_matrix).
+- **TF-IDF**: [Term Frequency - Inverse Document Frequency](https://en.wikipedia.org/wiki/Tf%E2%80%93idf). A measure that shows how important a word is to a document in a corpus.
+- **LDA**: [Latent Dirichlet Allocation](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) - the algorithm we're using to model topics.
 
 ## Install requirements
 
@@ -60,25 +79,37 @@ At this stage you will have a working setup to run the scripts below.
 
 ## Try it out
 
-### Example scripts
+The `train_lda.py` script is a command line interface (CLI) to the LDA tagger. You can customise the input dataset, the preprocessing, and the parameters passed to the underlying LDA library.
 
-If you are only interested in looking at some quick results, there are 2 scripts
-you could run.
+### Generating topics and tags for early years
 
-#### Using Python's lda library
+Using the early years data from the HTML pages to derive topics, and tagging every document to those topics:
 
-Run `python run_lda.py` in order to use the LDA library to generate topics and
-categorise the documents listed in the input file.
+```
+train_lda.py import --experiment early_years input/early-years.csv
+```
 
-#### Using Python's gensim library
+The `--experiment` option defines the output directory under `experiments`. It defaults to one generated from the current time.
 
-Run `python run_gensim.py` in order to use the gensim library to generate topics
-and categorise the documents listed in the input file.
+### Using a curated dictionary
 
-### Using the GensimEngine
+Pass a curated dictionary using the `--input-dictionary` option. By default the dictionary is generated from the corpus, excluding a number of predefined stopwords (defined in the `stopwords` directory).
 
-For more advanced usage, there is a class that can help. In `gensim_engine.py`
-there is a class that can be used to train and run an LDA model.
+```
+train_lda.py import input/audits_with_content.csv --input-dictionary input/dictionary.txt
+```
+
+### Retraining using the same corpus
+
+If you already ran an experiment, but something went wrong, you can use the `refine` subcommand to train it again, but reuse the corpus generated in the first run. The final argument is the original experiment directory name, which will be overwritten.
+
+```
+train_lda.py --numtopics 100 refine early-years
+```
+
+### Using the GensimEngine class
+
+In `gensim_engine.py` there is a class that can be used to train and run an LDA model programatically.
 
 This has the following API:
 
@@ -87,32 +118,27 @@ This has the following API:
 engine = GensimEngine(documents, log=True)
 
 # Train the model with the data provided
-engine.train(number_of_topics=20)
+experiment = engine.train(number_of_topics=20)
 
-# Tag a bunch of untagged documments
-engine.tag(untagged_documents)
+# Tag all documents in the corpus
+tags = experiment.tag()
 ```
 
-Each document is expected to be a list of dictionaries, where each dictionary
-has a `base_path` key and a `text` key.
+`documents` is expected to be a list of dictionaries, where each dictionary has a `base_path` key and a `text` key.
 
-The `train_lda.py` script provides a command line interface (CLI) to the GensimEngine, allowing you to customise the datasets and parameters.
+### Other scripts
+When we started the project we created two simple scripts to test the libraries we used.
 
-#### Generating topics and tags for early years
+You can run either of these to see some sample topics.
 
-Using the early years data from the HTML pages to derive topics, and tagging every document to those topics:
+#### Using Python's lda library
 
-```
-train_lda.py --output-topics output/early_years_topics.csv --output-tags output/early_years_tagged_data.csv import input/early-years.csv
-```
+Run `python run_lda.py` in order to use the LDA library to generate topics and categorise the documents listed in the input file.
 
-### Using a curated dictionary
+#### Using Python's gensim library
 
-Pass a curated dictionary using the `--input-dictionary` option.
+Run `python run_gensim.py` in order to use the gensim library to generate topics and categorise the documents listed in the input file.
 
-```
-train_lda.py --output-topics output/curated_early_years_topics.csv import input/audits_with_content.csv --input-dictionary input/dictionary.txt
-```
 
 ## Existing Data
 
@@ -178,3 +204,7 @@ The resulting CSV can then be passed to `data_import/combine_csv_columns.py` to 
 ```
 python data_import/combine_csv_columns.py < all_audits_for_education_with_pdf_and_indexable_content.csv > all_audits_for_education_words.csv
 ```
+
+## Licence
+
+[MIT License](LICENCE.txt)
